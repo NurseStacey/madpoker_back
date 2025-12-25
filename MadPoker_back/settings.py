@@ -31,7 +31,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'rest_framework_simplejwt.token_blacklist',
     'corsheaders',   
-    'login_api'
+    'login_api',
+    'Website_Data'
 ]
 
 MIDDLEWARE = [
