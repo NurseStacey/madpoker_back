@@ -5,3 +5,8 @@ class HomePageTextSerializer(serializers.ModelSerializer):
     class Meta:
         model = HomePageText
         fields ='__all__'    
+
+class SpecialMessageSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SpecialMessages
+        fields ='__all__'    
