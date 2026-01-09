@@ -33,7 +33,8 @@ INSTALLED_APPS = [
     'corsheaders',   
     'login_api',
     'Website_Data',
-    'venues'
+    'venues',
+    'games'
 ]
 
 MIDDLEWARE = [

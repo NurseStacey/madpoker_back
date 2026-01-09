@@ -8,5 +8,6 @@ urlpatterns = [
     path('react_test/', react_test),
     path('login_api/', include('login_api.urls')),
     path('website_data/', include('Website_Data.urls')),
-    path('venues/', include('venues.urls'))
+    path('venues/', include('venues.urls')),
+    path('games/', include('games.urls')),
 ]
