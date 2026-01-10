@@ -10,3 +10,23 @@ class GamesSerializer(serializers.ModelSerializer):
 
     def get_Text(self,obj):
         return obj.GetText()
+    
+class GamesFOrPlayersSerializer(serializers.ModelSerializer):
+
+    VenueName = serializers.SerializerMethodField()
+
+    class Meta:
+        model = GamesModel
+        fields =('id', 'VenueName', 'Description', 'Time', 'WeekDay') 
+
+    def get_VenueName(self,obj):
+        if obj.Venue==None:
+            return ''
+        else:
+            return obj.Venue.VenueName 
+    
+class PlayedGamessSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = PlayedGamesModel
+        fields ='__all__'                

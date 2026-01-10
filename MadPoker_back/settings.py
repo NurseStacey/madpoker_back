@@ -34,7 +34,8 @@ INSTALLED_APPS = [
     'login_api',
     'Website_Data',
     'venues',
-    'games'
+    'games',
+    'players'
 ]
 
 MIDDLEWARE = [
