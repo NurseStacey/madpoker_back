@@ -4,6 +4,15 @@ from venues.models import VenuesModel
 from datetime import date,timedelta
 from players.models import PlayersModel
 
+WeekDayNumbers ={
+    'Sunday':0,
+    'Monday':1,
+    'Tuesday':2,
+    'Wednesday':3,
+    'Thursday':4,
+    'Friday':5,
+    'Saturday':6
+}
 
 class SeasonsModel(models.Model):
     SeasonNumber=models.CharField(default=0)
@@ -28,10 +37,13 @@ class GamesModel(models.Model):
             today_weekday = (Today.weekday()+1 % 7) #0 is Monday here.  0 is Sunday in model
 
 
-            PlayedGamesModel.create(
+            next_game = PlayedGamesModel(
                 WhichGame=self,
-                Date = (date(Today.year, Today.month, Today.day)+timedelta(days=(self.WeekDay-today_weekday)))
+                Date = (date(Today.year, Today.month, Today.day)+timedelta(days=(WeekDayNumbers[self.WeekDay]-today_weekday)))
             )
+            next_game.save()
+        
+        return next_game.id
 
     def GetText(self):
 

@@ -11,8 +11,8 @@ class GamesForPlayersAPI(APIView):
 
     def get(self, request, *args, **kwargs):
 
-        Games = GamesModel.objects.all()
-        serializer = GamesFOrPlayersSerializer(Games, many=True)
+        Games = GamesModel.objects.exclude(Description='default game')
+        serializer = GamesForPlayersSerializer(Games, many=True)
         return Response(serializer.data)
     
 class GamesModelAPI(APIView):
@@ -130,5 +130,5 @@ class PlayedGamesAPI(APIView):
     def get(self, request, *args, **kwargs):
 
         Games = GamesModel.objects.all()
-        serializer = GamesFOrPlayersSerializer(Games, many=True)
+        serializer = GamesForPlayersSerializer(Games, many=True)
         return Response(serializer.data)

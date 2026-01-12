@@ -16,13 +16,17 @@ class GamesSerializer(serializers.ModelSerializer):
     def get_Text(self,obj):
         return obj.GetText()
     
-class GamesFOrPlayersSerializer(serializers.ModelSerializer):
+class GamesForPlayersSerializer(serializers.ModelSerializer):
 
     VenueName = serializers.SerializerMethodField()
+    NextPlayerGameID = serializers.SerializerMethodField()
 
     class Meta:
         model = GamesModel
-        fields =('id', 'VenueName', 'Description', 'Time', 'WeekDay') 
+        fields =('id', 'VenueName', 'NextPlayerGameID','Description', 'Time', 'WeekDay') 
+
+    def get_NextPlayerGameID(self, obj):
+        return obj.GetNextGameID()
 
     def get_VenueName(self,obj):
         if obj.Venue==None:
