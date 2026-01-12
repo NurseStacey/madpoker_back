@@ -37,30 +37,45 @@ class GamesModelAPI(APIView):
         #print(serializer.errors)
         return Response({'error':'invalid data'}, status=status.HTTP_400_BAD_REQUEST)
 
-        
+class SeasonsModelAPI(APIView):
     
-    def delete(self, request,id,*args, **kwargs):
+    def get(self, request, *args, **kwargs):
+
+        Seasons = SeasonsModel.objects.all()
+        serializer = SeasonSerializer(Seasons, many=True)
+
+        return Response(serializer.data)
+    
+    def post(self, request,*args, **kwargs):
 
         try:
-            thisRecord = GamesModel.objects.get(id=id)
-            thisRecord.delete()
-        except:
-            return Response({}, status=status.HTTP_400_BAD_REQUEST)
-        
-        return Response({}, status=status.HTTP_200_OK)
-    
-    def patch(self, request,id,*args, **kwargs):
-        try:
-            thisRecord = GamesModel.objects.get(id=id)
-            serializer = GamesSerializer(thisRecord, data=request.data, partial=True)
-            print(request.data)
+            serializer = SeasonSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
         except:
+            
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        #
+        #print(serializer.errors)
+        return Response({'error':'invalid data'}, status=status.HTTP_400_BAD_REQUEST)
+            
+    def patch(self, request,id,*args, **kwargs):
+        try:
+
+            thisRecord = SeasonsModel.objects.get(id=id)
+            serializer = SeasonSerializer(thisRecord, data=request.data, partial=True)
+            if serializer.is_valid():
+
+                serializer.save()
+
+                
+        except Exception as e:
+            print(e)
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
-        
+        print('here')
         return Response({}, status=status.HTTP_200_OK)   
+    
     
 
 class OneGamesModelAPI(APIView):

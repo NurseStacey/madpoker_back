@@ -8,7 +8,7 @@ class PlayersModel(models.Model):
     @classmethod
     def get_default_pk(cls):
         oneGame, created = cls.objects.get_or_create(
-            title='default player', 
+            player='default player', 
             defaults={
                 'player':'this is not a player',
             },

@@ -1,6 +1,11 @@
 from rest_framework import serializers
 from .models import *
 
+class SeasonSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = SeasonsModel
+        fields ='__all__'    
+
 class GamesSerializer(serializers.ModelSerializer):
     Text = serializers.SerializerMethodField()
 
