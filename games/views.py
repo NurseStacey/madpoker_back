@@ -8,12 +8,45 @@ from rest_framework import status
 
 
 class GamesForPlayersAPI(APIView):
+            
+    # def patch(self, request,id,*args, **kwargs):
+    #     try:
 
-    def get(self, request, *args, **kwargs):
+    #         thisRecord = PlayedGamesModel.objects.get(id=id)
+    #         serializer = PlayedGamessSerializer(thisRecord, data=request.data, partial=True)
+    #         if serializer.is_valid():
 
-        Games = GamesModel.objects.exclude(Description='default game')
-        serializer = GamesForPlayersSerializer(Games, many=True)
-        return Response(serializer.data)
+    #             serializer.save()
+    #             return Response(serializer.data, status=status.HTTP_201_CREATED)
+            
+    #     except:
+    #         pass
+        
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    # def get(self, request, pk, *args, **kwargs):
+
+    #     Games = PlayedGamesModel.objects.exclude(Description='default game')
+    #     serializer = GamesForPlayersSerializer(Games, many=True)
+    #     return Response(serializer.data)
+
+    def post(self, request,*args, **kwargs):
+
+        try:
+            thisRecord = PlayedGamesModel.objects.get(id=request.data['WhichGame'])
+            thisPlayer = PlayersModel.objects.get(id=request.data['WhichPlayer'])
+            if thisPlayer not in thisRecord.Players.all():
+                thisRecord.Players.add(thisPlayer)
+
+                return Response({'status':'player added'}, status=status.HTTP_201_CREATED)
+        except:
+            
+            return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({'status':'player was already registered'}, status=status.HTTP_200_OK)
+        #
+        #print(serializer.errors)
+        return Response({'error':'invalid data'}, status=status.HTTP_400_BAD_REQUEST)
     
 class GamesModelAPI(APIView):
     

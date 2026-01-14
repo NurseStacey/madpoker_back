@@ -5,7 +5,7 @@ from datetime import date,timedelta
 from players.models import PlayersModel
 
 WeekDayNumbers ={
-    'Sunday':0,
+    'Sunday':7,
     'Monday':1,
     'Tuesday':2,
     'Wednesday':3,
