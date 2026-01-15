@@ -27,7 +27,9 @@ class GamesModel(models.Model):
     Description=models.CharField(max_length=250, null=True)
     active=models.BooleanField(default=True)
     
-
+    def get_simple_text(self):
+        return('{} - {}'.format(self.Venue, self.WeekDay))
+    
     def GetNextGameID(self):
         Today=date.today()
         next_game=self.game_details.all().order_by('-Date').first()
@@ -36,10 +38,13 @@ class GamesModel(models.Model):
   
             today_weekday = (Today.weekday()+1 % 7) #0 is Monday here.  0 is Sunday in model
 
+            offset=WeekDayNumbers[self.WeekDay]-today_weekday
+            if offset<0:
+                offset+=7
 
             next_game = PlayedGamesModel(
                 WhichGame=self,
-                Date = (date(Today.year, Today.month, Today.day)+timedelta(days=(WeekDayNumbers[self.WeekDay]-today_weekday)))
+                Date = (date(Today.year, Today.month, Today.day)+timedelta(days=offset))
             )
             next_game.save()
         

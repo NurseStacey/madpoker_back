@@ -37,9 +37,14 @@ class GamesForPlayersSerializer(serializers.ModelSerializer):
 class PlayedGamesSerializer(serializers.ModelSerializer):
 
     PlayersArray = serializers.SerializerMethodField()
+    Text = serializers.SerializerMethodField()
     class Meta:
         model = PlayedGamesModel
         fields ='__all__'                
 
     def get_PlayersArray(self, obj):
         return obj.get_players()
+    
+    def get_Text(self, obj):
+
+        return (obj.WhichGame.get_simple_text())

@@ -176,7 +176,7 @@ class OneGamesModelAPI(APIView):
 class PlayedGamesAPI(APIView):
 
     def get(self, request, *args, **kwargs):
-
+        print("here")
         Games = GamesModel.objects.all()
         serializer = GamesForPlayersSerializer(Games, many=True)
         return Response(serializer.data)
