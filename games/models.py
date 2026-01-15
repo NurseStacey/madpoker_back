@@ -46,8 +46,11 @@ class GamesModel(models.Model):
         return next_game.id
 
     def GetText(self):
+        try:
 
-        return '{} - {} - {} - {}'.format(self.Venue.VenueName, self.WeekDay, self.Time, self.Description)
+            return '{} - {} - {} - {}'.format(self.Venue.VenueName, self.WeekDay, self.Time, self.Description)
+        except:
+            return 'default'
     
     @classmethod
     def get_default_pk(cls):
@@ -64,3 +67,14 @@ class PlayedGamesModel(models.Model):
     WhichGame= models.ForeignKey(GamesModel, on_delete=models.PROTECT, default=GamesModel.get_default_pk, related_name='game_details')
     Date= models.DateField(default=date.today())
     Players=models.ManyToManyField(PlayersModel,  default=PlayersModel.get_default_pk)
+
+    def get_players(self):
+
+        return_value=[]
+        for onePlayer in self.Players.all():
+            return_value.append({
+                'id':onePlayer.id,
+                'name':onePlayer.player
+            })
+
+        return return_value

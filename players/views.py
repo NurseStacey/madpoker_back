@@ -20,9 +20,12 @@ class PlayersAPI(APIView):
         try:
 
             serializer = PlayersSerializer(data=request.data)
+            print(request.data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
+            else:
+                print(serializer.error_messages)
         except Exception as e:
             print(e)
             #print(serializer.errors)
