@@ -3,5 +3,5 @@ from .models import *
 
 class VenuesSerializer(serializers.ModelSerializer):
     class Meta:
-        model = VenuesModel
+        model = VenueModel
         fields ='__all__'    

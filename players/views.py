@@ -11,7 +11,7 @@ class PlayersAPI(APIView):
 
     def get(self, request, *args, **kwargs):
 
-        Games = PlayersModel.objects.all()
+        Games = PlayerModel.objects.all()
         serializer = PlayersSerializer(Games, many=True)
         return Response(serializer.data)
     
@@ -20,7 +20,7 @@ class PlayersAPI(APIView):
         try:
 
             serializer = PlayersSerializer(data=request.data)
-            print(request.data)
+
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -28,8 +28,7 @@ class PlayersAPI(APIView):
                 print(serializer.error_messages)
         except Exception as e:
             print(e)
-            #print(serializer.errors)
+
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        #
-        #print(serializer.errors)
+
         return Response({'error':'invalid data'}, status=status.HTTP_400_BAD_REQUEST)

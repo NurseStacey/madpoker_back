@@ -11,7 +11,7 @@ class VenuesAPI(APIView):
     
     def get(self, request, *args, **kwargs):
 
-        TextItems = VenuesModel.objects.all().order_by('VenueName')
+        TextItems = VenueModel.objects.all().order_by('venue_name')
         serializer = VenuesSerializer(TextItems, many=True)
         return Response(serializer.data)
     
@@ -27,7 +27,7 @@ class VenuesAPI(APIView):
     def delete(self, request,id,*args, **kwargs):
 
         try:
-            thisRecord = VenuesModel.objects.get(id=id)
+            thisRecord = VenueModel.objects.get(id=id)
             thisRecord.delete()
         except:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
@@ -36,7 +36,7 @@ class VenuesAPI(APIView):
     
     def patch(self, request,id,*args, **kwargs):
         try:
-            thisRecord = VenuesModel.objects.get(id=id)
+            thisRecord = VenueModel.objects.get(id=id)
             serializer = VenuesSerializer(thisRecord, data=request.data, partial=True)
             
             if serializer.is_valid():

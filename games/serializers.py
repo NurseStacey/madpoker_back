@@ -3,48 +3,59 @@ from .models import *
 
 class SeasonSerializer(serializers.ModelSerializer):
     class Meta:
-        model = SeasonsModel
+        model = SeasonModel
         fields ='__all__'    
 
 class GamesSerializer(serializers.ModelSerializer):
     Text = serializers.SerializerMethodField()
+    venue_name = serializers.SerializerMethodField()
+    NextPlayerGameID = serializers.SerializerMethodField()
 
     class Meta:
-        model = GamesModel
+        model = GameModel
         fields ='__all__'    
 
     def get_Text(self,obj):
         return obj.GetText()
     
+    def get_NextPlayerGameID(self, obj):
+        return obj.GetNextGameID()
+
+    def get_venue_name(self,obj):
+        if obj.venue==None:
+            return ''
+        else:
+            return obj.venue.venue_name     
+    
 class GamesForPlayersSerializer(serializers.ModelSerializer):
 
-    VenueName = serializers.SerializerMethodField()
+    venue_name = serializers.SerializerMethodField()
     NextPlayerGameID = serializers.SerializerMethodField()
 
     class Meta:
-        model = GamesModel
-        fields =('id', 'VenueName', 'NextPlayerGameID','Description', 'Time', 'WeekDay') 
+        model = GameModel
+        fields =('id', 'venue_name', 'NextPlayerGameID','description', 'time', 'week_day') 
 
     def get_NextPlayerGameID(self, obj):
         return obj.GetNextGameID()
 
-    def get_VenueName(self,obj):
-        if obj.Venue==None:
+    def get_venue_name(self,obj):
+        if obj.venue==None:
             return ''
         else:
-            return obj.Venue.VenueName 
+            return obj.venue.venue_name 
     
 class PlayedGamesSerializer(serializers.ModelSerializer):
 
     PlayersArray = serializers.SerializerMethodField()
-    Text = serializers.SerializerMethodField()
+    ##Text = serializers.SerializerMethodField()
     class Meta:
-        model = PlayedGamesModel
-        fields ='__all__'                
+        model = PlayedGameModel
+        fields =['PlayersArray' ]               
 
     def get_PlayersArray(self, obj):
         return obj.get_players()
     
-    def get_Text(self, obj):
+    # def get_Text(self, obj):
 
-        return (obj.WhichGame.get_simple_text())
+    #     return (obj.which_game.get_simple_text())

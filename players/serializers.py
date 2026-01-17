@@ -4,6 +4,6 @@ from .models import *
 class PlayersSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = PlayersModel
+        model = PlayerModel
         fields ='__all__'    
 
