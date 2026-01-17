@@ -12,6 +12,7 @@ class GameRostersAPI(APIView):
 #used to get roster for  director
     def get(self, request, id, *args, **kwargs):
 
+        
         thisGame = PlayedGameModel.objects.filter(which_game=GameModel.objects.get(id=id)).latest('date')
         serializer = PlayedGamesSerializer(thisGame, many=False)
         return Response(serializer.data)
@@ -83,9 +84,22 @@ class GamesRegistrationsAPI(APIView):
 class GamesByDirectorAPI(APIView):
     #used if we need the games assigned to one director
     def get(self, request, id,  *args, **kwargs):
-        Games = GameModel.objects.filter(director=UserModel.objects.get(id=id))
-        serializer = GamesSerializer(Games, many=True)
-        return Response(serializer.data)
+
+    
+        if id<0:
+            return Response({'status':'error'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        try:
+            Games = GameModel.objects.filter(director=UserModel.objects.get(id=id))
+          
+            serializer = GamesSerializer(Games, many=True)
+           
+        except Exception as e:
+            print(e)
+            return Response({'status':'error'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        print('there')
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
         
 class GameModelAPI(APIView):
     #used for getting all games and creating/altering a game
