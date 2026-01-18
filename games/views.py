@@ -29,6 +29,9 @@ class NewPlayerRegistrationAPI(APIView):
             return RegisterForGame(newPlayerSerializer.data['id'],request.data['which_game'])
 
         except Exception as e:
+            if 'player' in newPlayerSerializer.errors:
+                if 'unique' in [x.code for x in newPlayerSerializer.errors['player']]:
+                    return Response({'status':'duplicit username'}, status=status.HTTP_409_CONFLICT)
             print(newPlayerSerializer.errors)
             print(e)
             return Response({'status':'problem'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
