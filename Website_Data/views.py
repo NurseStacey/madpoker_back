@@ -11,9 +11,12 @@ class HomePageTextAPI(APIView):
     
     def get(self, request, *args, **kwargs):
 
-        TextItems = HomePageText.objects.all()
-        serializer = HomePageTextSerializer(TextItems, many=True)
-        return Response(serializer.data)
+        try:
+            TextItems = HomePageText.objects.all()
+            serializer = HomePageTextSerializer(TextItems, many=True)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
     
     def post(self, request,*args, **kwargs):
 

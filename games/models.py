@@ -54,7 +54,7 @@ class GameModel(models.Model):
     def GetText(self):
         try:
 
-            return '{} - {} - {} - {}'.format(self.venue.venue_name, self.week_day, self.time, self.description)
+            return '{} - {} - {} - {}'.format(self.venue.venue_name, self.week_day,self.time, self.description)
         except:
             return 'default'
     
@@ -72,7 +72,7 @@ class GameModel(models.Model):
 class GameResultModel(models.Model):
     player=models.ForeignKey(PlayerModel,  default=PlayerModel.get_default_pk, on_delete=models.PROTECT)
     position=models.IntegerField(default=-1)
-    registration_date_time=models.DateTimeField(default=timezone.now)
+    registration_date_time=models.DateTimeField(default=timezone.localtime())
 
 class PlayedGameModel(models.Model):
     which_game= models.ForeignKey(GameModel, on_delete=models.PROTECT, default=GameModel.get_default_pk, related_name='game_details')
@@ -84,12 +84,15 @@ class PlayedGameModel(models.Model):
 
         return_value=[]
         for onePlayer in self.player_results.all():
-            
+            position_text=''
+            if onePlayer.position>0:
+                position_text=onePlayer.position
+
             return_value.append({
                 'id':onePlayer.id,
                 'name':onePlayer.player.player,
-                'registration_time':onePlayer.registration_date_time.strftime('%m-%d  %H:%M'),
-                'position':''.format(onePlayer.position) if onePlayer.position>0 else ''
+                'registration_time':timezone.localtime(onePlayer.registration_date_time).strftime('%m-%d  %H:%M'),
+                'position':position_text
             })
 
         return return_value

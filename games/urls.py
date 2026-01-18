@@ -11,5 +11,6 @@ urlpatterns = [
     #path('games_for_player/', PlayedGamesAPI.as_view(), name='games-for-player'),    
     path('register_player_for_game/', GamesRegistrationsAPI.as_view(), name='games-for-player'),    
     path('register_new_player_for_game/', NewPlayerRegistrationAPI.as_view(), name='games-for-player'),    
-    path('game_roster/<int:id>/', GameRostersAPI.as_view(), name='games-for-player'),        
+    path('game_roster/<int:id>/', GameRostersAPI.as_view(), name='games-for-player'), 
+    path('update_roster/',UpdateRosterAPI.as_view(), name='update_roster')       
 ]
