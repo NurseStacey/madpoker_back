@@ -27,7 +27,8 @@ class GameModel(models.Model):
     time=models.CharField(max_length=10)
     venue=models.ForeignKey(VenueModel, null=True, on_delete=models.PROTECT)
     all_sections=models.ManyToManyField(SectionModel,through='SectionThrough', related_name='game_sections')
-    
+    active=models.BooleanField(default=True)  
+
     def get_dates(self):
         datelist = [{'date':x.date,'id':x.id} for x in self.game_details.all()]
         datelist.sort(key=lambda x: x['date'], reverse=True)
@@ -59,7 +60,7 @@ class GameModel(models.Model):
     def GetText(self):
         try:
 
-            return '{} - {} - {} - {}'.format(self.venue.venue_name, self.week_day,self.time, self.description)
+            return '{} - {} - {} '.format(self.venue.venue_name, self.week_day,self.time)
         except:
             return 'default'
     
@@ -75,7 +76,7 @@ class GameModel(models.Model):
         return oneGame.pk    
 
 class SectionThrough(models.Model):
-    event=models.ForeignKey(SectionModel, on_delete=models.PROTECT)
+    section=models.ForeignKey(SectionModel, on_delete=models.PROTECT)
     game=models.ForeignKey(GameModel, on_delete=models.PROTECT)
     director=models.ForeignKey(UserModel, null=True, on_delete=models.SET_NULL)
     active=models.BooleanField(default=True)  

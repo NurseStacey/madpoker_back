@@ -9,21 +9,21 @@ class SeasonSerializer(serializers.ModelSerializer):
 class GamesSerializer(serializers.ModelSerializer):
     Text = serializers.SerializerMethodField()
     venue_name = serializers.SerializerMethodField()
-    NextPlayerGameID = serializers.SerializerMethodField()
-    Dates = serializers.SerializerMethodField()
+    #NextPlayerGameID = serializers.SerializerMethodField()
+    #Dates = serializers.SerializerMethodField()
 
     class Meta:
         model = GameModel
         fields ='__all__'    
 
-    def get_Dates(self, obj):
-        return obj.get_dates()
+    # def get_Dates(self, obj):
+    #     return obj.get_dates()
     
     def get_Text(self,obj):
         return obj.GetText()
     
-    def get_NextPlayerGameID(self, obj):
-        return obj.GetNextGameID()
+    # def get_NextPlayerGameID(self, obj):
+    #     return obj.GetNextGameID()
 
     def get_venue_name(self,obj):
         if obj.venue==None:
