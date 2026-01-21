@@ -19,15 +19,20 @@ class SeasonModel(models.Model):
     season_number=models.CharField(default=0)
     start_date=models.DateField(default=date.today())
 
+class SectionModel(models.Model):
+    name=models.CharField(max_length=20, default='Texas Holdem', unique=True)
 
 class GameModel(models.Model):
     week_day = models.CharField(max_length=10)
     time=models.CharField(max_length=10)
-    director=models.ForeignKey(UserModel, null=True, on_delete=models.SET_NULL)
     venue=models.ForeignKey(VenueModel, null=True, on_delete=models.PROTECT)
-    description=models.CharField(max_length=250, null=True)
-    active=models.BooleanField(default=True)
+    all_sections=models.ManyToManyField(SectionModel,through='SectionThrough', related_name='game_sections')
     
+    def get_dates(self):
+        datelist = [{'date':x.date,'id':x.id} for x in self.game_details.all()]
+        datelist.sort(key=lambda x: x['date'], reverse=True)
+        return [{'date':x['date'].strftime('%m-%d'),'id':x['id']} for x in datelist]
+
     def get_simple_text(self):
         return('{} - {}'.format(self.venue.venue_name, self.week_day))
     
@@ -68,7 +73,14 @@ class GameModel(models.Model):
             },
         )
         return oneGame.pk    
-    
+
+class SectionThrough(models.Model):
+    event=models.ForeignKey(SectionModel, on_delete=models.PROTECT)
+    game=models.ForeignKey(GameModel, on_delete=models.PROTECT)
+    director=models.ForeignKey(UserModel, null=True, on_delete=models.SET_NULL)
+    active=models.BooleanField(default=True)  
+    description=models.CharField(max_length=250, null=True)  
+
 class GameResultModel(models.Model):
     player=models.ForeignKey(PlayerModel,  default=PlayerModel.get_default_pk, on_delete=models.PROTECT)
     position=models.IntegerField(default=-1)

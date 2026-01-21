@@ -7,13 +7,26 @@ from .serializers import *
 from rest_framework.permissions import AllowAny
 from rest_framework import status
 from players.serializers import PlayersSerializer
+from django.db.models import ProtectedError
 
+class GameResultsAPI(APIView):
+    #only used for removing a player from the roster
+    def delete(self, request, id, *args, **kwargs):
+
+        try:
+            thisRecord = GameResultModel.objects.get(id=id)
+            thisRecord.delete()
+        except:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({}, status=status.HTTP_200_OK)
+            
 class GameRostersAPI(APIView):
 #used to get roster for  director
     def get(self, request, id, *args, **kwargs):
 
-        
-        thisGame = PlayedGameModel.objects.filter(which_game=GameModel.objects.get(id=id)).latest('date')
+        print(id)
+        thisGame = PlayedGameModel.objects.get(id=id)
         serializer = PlayedGamesSerializer(thisGame, many=False)
         return Response(serializer.data)
 
@@ -32,12 +45,9 @@ class NewPlayerRegistrationAPI(APIView):
             if 'player' in newPlayerSerializer.errors:
                 if 'unique' in [x.code for x in newPlayerSerializer.errors['player']]:
                     return Response({'status':'duplicit username'}, status=status.HTTP_409_CONFLICT)
-            print(newPlayerSerializer.errors)
-            print(e)
+
             return Response({'status':'problem'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
         
-
-
 def RegisterForGame(PlayerID, GameID):
     try:
 
@@ -91,7 +101,8 @@ class GameModelAPI(APIView):
             Games = GameModel.objects.all()
             serializer = GamesSerializer(Games, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
-        except:
+        except Exception as e:
+
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
     
     def post(self, request,*args, **kwargs):
@@ -183,6 +194,7 @@ class OneGameModelAPI(APIView):
         return Response({}, status=status.HTTP_200_OK)
     
     def patch(self, request,id,*args, **kwargs):
+        print(request.data)
         try:
             thisRecord = GameModel.objects.get(id=id)
             serializer = GamesSerializer(thisRecord, data=request.data, partial=True)
@@ -219,3 +231,52 @@ class UpdateRosterAPI(APIView):
                 'result':'problem',
                 'problem_players':problemPlayers
                 }, status=status.HTTP_400_BAD_REQUEST)
+        
+
+class EventsAPI(APIView):
+    
+    def get(self, request, *args, **kwargs):
+
+        TextItems = EventModel.objects.all().order_by('event')
+        serializer = EventSerializer(TextItems, many=True)
+        return Response(serializer.data)
+    
+    def post(self, request,*args, **kwargs):
+
+        try:
+            serializer = EventSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            if 'event' in EventSerializer.errors:
+                if 'unique' in [x.code for x in EventSerializer.errors['event']]:
+                    return Response({'status':'duplicit event name'}, status=status.HTTP_409_CONFLICT)
+
+            return Response({'status':'problem'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def delete(self, request,id,*args, **kwargs):
+        
+        try:
+            thisRecord = EventModel.objects.get(id=id)
+            thisRecord.delete()
+        except ProtectedError:
+            return Response({}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({}, status=status.HTTP_200_OK)
+    
+    def patch(self, request,id,*args, **kwargs):
+        try:
+            thisRecord = EventModel.objects.get(id=id)
+            serializer = EventSerializer(thisRecord, data=request.data, partial=True)
+            
+            if serializer.is_valid():
+                serializer.save()
+        except:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({}, status=status.HTTP_200_OK)   
+            

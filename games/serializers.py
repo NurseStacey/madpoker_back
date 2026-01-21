@@ -10,11 +10,15 @@ class GamesSerializer(serializers.ModelSerializer):
     Text = serializers.SerializerMethodField()
     venue_name = serializers.SerializerMethodField()
     NextPlayerGameID = serializers.SerializerMethodField()
+    Dates = serializers.SerializerMethodField()
 
     class Meta:
         model = GameModel
         fields ='__all__'    
 
+    def get_Dates(self, obj):
+        return obj.get_dates()
+    
     def get_Text(self,obj):
         return obj.GetText()
     
@@ -56,6 +60,24 @@ class PlayedGamesSerializer(serializers.ModelSerializer):
     def get_PlayersArray(self, obj):
         return obj.get_players()
     
-    # def get_Text(self, obj):
+# class SectionSerializer(serializers.ModelSerializer):
 
-    #     return (obj.which_game.get_simple_text())
+#     class Meta:
+#         model=SeasonModel
+#         fields='__all__'
+
+# class EventThroughSerializer(serializers.ModelSerializer):
+#     event_name = serializers.CharField(source='event.name', read_only=True)
+
+#     class Meta:
+#         model = EventThrough
+#         fields = ['event_name', 'director', 'active']        
+
+# class GameSerializerNew(serializers.ModelSerializer):
+
+#     venue_name = serializers.CharField(source='venue.venue_name', read_only=True)
+#     events = EventThroughSerializer(source='EventThrough', many=True, read_only=True)
+
+#     class Meta:
+#         model = GameModel
+#         fields = ['week_day', 'time','venue_name','description','events'],
