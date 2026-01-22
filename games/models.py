@@ -17,7 +17,7 @@ WeekDayNumbers ={
 
 class SeasonModel(models.Model):
     season_number=models.CharField(default=0)
-    start_date=models.DateField(default=date.today())
+    start_date=models.DateField(default=timezone.now)
 
 class SectionModel(models.Model):
     name=models.CharField(max_length=20, default='Texas Holdem', unique=True)
@@ -85,11 +85,11 @@ class SectionThrough(models.Model):
 class GameResultModel(models.Model):
     player=models.ForeignKey(PlayerModel,  default=PlayerModel.get_default_pk, on_delete=models.PROTECT)
     position=models.IntegerField(default=-1)
-    registration_date_time=models.DateTimeField(default=timezone.localtime())
+    registration_date_time=models.DateTimeField(default=timezone.now)
 
 class PlayedGameModel(models.Model):
     which_game= models.ForeignKey(GameModel, on_delete=models.PROTECT, default=GameModel.get_default_pk, related_name='game_details')
-    date= models.DateField(default=date.today())
+    date= models.DateField(default=timezone.now)
     player_results=models.ManyToManyField(GameResultModel)
     #players=models.ManyToManyField(PlayerModel,  default=PlayerModel.get_default_pk)
 

@@ -111,12 +111,17 @@ class GameModelAPI(APIView):
             serializer = GamesSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
+                temp=GameModel.objects.get(id=serializer.data['id'])
+
         except:
             
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({'error':'invalid data'}, status=status.HTTP_400_BAD_REQUEST)
+        SectionThrough.objects.create(
+            section=SectionModel.objects.get(name='Texas Holdem'),
+            game=GameModel.objects.get(id=serializer.data['id'])
+        )
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class SeasonModelAPI(APIView):
     #For seasons
@@ -233,33 +238,36 @@ class UpdateRosterAPI(APIView):
                 }, status=status.HTTP_400_BAD_REQUEST)
         
 
-class EventsAPI(APIView):
+class SectionsAPI(APIView):
     
     def get(self, request, *args, **kwargs):
 
-        TextItems = EventModel.objects.all().order_by('event')
-        serializer = EventSerializer(TextItems, many=True)
+        TextItems = SectionModel.objects.all().order_by('name')
+        serializer = SectionSerializer(TextItems, many=True)
         return Response(serializer.data)
     
     def post(self, request,*args, **kwargs):
-
+        print(request.data)
         try:
-            serializer = EventSerializer(data=request.data)
+            serializer = SectionSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         except Exception as e:
-            if 'event' in EventSerializer.errors:
-                if 'unique' in [x.code for x in EventSerializer.errors['event']]:
+            try:
+                if 'unique' in [x.code for x in SectionSerializer.errors['name']]:
                     return Response({'status':'duplicit event name'}, status=status.HTTP_409_CONFLICT)
-
+            except:
+                pass
+        
             return Response({'status':'problem'}, status=status.HTTP_422_UNPROCESSABLE_ENTITY)
+        
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def delete(self, request,id,*args, **kwargs):
         
         try:
-            thisRecord = EventModel.objects.get(id=id)
+            thisRecord = SectionModel.objects.get(id=id)
             thisRecord.delete()
         except ProtectedError:
             return Response({}, status=status.HTTP_403_FORBIDDEN)
@@ -270,8 +278,8 @@ class EventsAPI(APIView):
     
     def patch(self, request,id,*args, **kwargs):
         try:
-            thisRecord = EventModel.objects.get(id=id)
-            serializer = EventSerializer(thisRecord, data=request.data, partial=True)
+            thisRecord = SectionModel.objects.get(id=id)
+            serializer = SectionSerializer(thisRecord, data=request.data, partial=True)
             
             if serializer.is_valid():
                 serializer.save()
@@ -280,3 +288,16 @@ class EventsAPI(APIView):
         
         return Response({}, status=status.HTTP_200_OK)   
             
+
+class SectionsThroughAPI(APIView):
+    
+    def get(self, request, *args, **kwargs):
+
+        try:
+            AllItems = SectionThrough.objects.all()
+            serializer = SectionThroughSerializer(AllItems, many=True)
+            print(serializer.data)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response({'status':'error'}, status=status.HTTP_400_BAD_REQUEST)

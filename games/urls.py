@@ -14,6 +14,7 @@ urlpatterns = [
     path('game_roster/<int:id>/', GameRostersAPI.as_view(), name='games-for-player'), 
     path('update_roster/',UpdateRosterAPI.as_view(), name='update_roster'),
     path('remove_layer_from_game/<int:id>/',GameResultsAPI.as_view(), name='remove_layer_from_game'),    
-    path('events/',EventsAPI.as_view(), name='events'),        
-    path('one_event/<int:id>/',EventsAPI.as_view(), name='one_event'),            
+    path('sections/',SectionsAPI.as_view(), name='sections'),        
+    path('one_section/<int:id>/',SectionsAPI.as_view(), name='one_event'),
+    path('sectionthrough/',SectionsThroughAPI.as_view(), name='section_through'),       
 ]

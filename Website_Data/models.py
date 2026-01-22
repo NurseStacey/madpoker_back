@@ -1,5 +1,6 @@
 from django.db import models
 from datetime import date
+from django.utils import timezone
 
 class HomePageText(models.Model):
     id = models.BigAutoField(primary_key=True)
@@ -13,4 +14,4 @@ class SpecialMessages(models.Model):
     text = models.TextField(null=False)
     color = models.CharField(max_length=10, default='#0000DD')
     font_size = models.IntegerField(default=18)
-    date = models.DateField(default=date.today())
+    date = models.DateField(default=timezone.now)

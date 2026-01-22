@@ -35,7 +35,8 @@ INSTALLED_APPS = [
     'Website_Data',
     'venues',
     'games',
-    'players'
+    'players',
+    'learning'
 ]
 
 MIDDLEWARE = [
