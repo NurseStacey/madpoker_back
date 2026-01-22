@@ -6,15 +6,24 @@ class SeasonSerializer(serializers.ModelSerializer):
         model = SeasonModel
         fields ='__all__'    
 
+# class CustomForiegnField(serializers.):
+#     def to_representation(self, value):
+        
+#         if value is None:
+#             return -1  # Change null output to 0
+#         return super().to_representation(value)
+    
 class GamesSerializer(serializers.ModelSerializer):
     Text = serializers.SerializerMethodField()
-    venue_name = serializers.SerializerMethodField()
+    #director=CustomForiegnField(allow_null=True)
+    #venue_name = serializers.SerializerMethodField()
     #NextPlayerGameID = serializers.SerializerMethodField()
     #Dates = serializers.SerializerMethodField()
 
     class Meta:
         model = GameModel
         fields ='__all__'    
+
 
     # def get_Dates(self, obj):
     #     return obj.get_dates()
@@ -25,11 +34,11 @@ class GamesSerializer(serializers.ModelSerializer):
     # def get_NextPlayerGameID(self, obj):
     #     return obj.GetNextGameID()
 
-    def get_venue_name(self,obj):
-        if obj.venue==None:
-            return ''
-        else:
-            return obj.venue.venue_name     
+    # def get_venue_name(self,obj):
+    #     if obj.venue==None:
+    #         return ''
+    #     else:
+    #         return obj.venue.venue_name     
     
 class GamesForPlayersSerializer(serializers.ModelSerializer):
 
@@ -64,6 +73,12 @@ class SectionSerializer(serializers.ModelSerializer):
 
     class Meta:
         model=SectionModel
+        fields='__all__'
+
+class SectionThroughSerializerSimple(serializers.ModelSerializer):
+
+    class Meta:
+        model=SectionThrough
         fields='__all__'
 
 class SectionThroughSerializer(serializers.ModelSerializer):

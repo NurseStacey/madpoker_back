@@ -90,7 +90,7 @@ class GamesByDirectorAPI(APIView):
             print(e)
             return Response({'status':'error'}, status=status.HTTP_400_BAD_REQUEST)
         
-        print('there')
+
         return Response(serializer.data, status=status.HTTP_201_CREATED)
         
 class GameModelAPI(APIView):
@@ -102,7 +102,7 @@ class GameModelAPI(APIView):
             serializer = GamesSerializer(Games, many=True)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
-
+            print(e)
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
     
     def post(self, request,*args, **kwargs):
@@ -159,7 +159,7 @@ class SeasonModelAPI(APIView):
         except Exception as e:
             print(e)
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
-        print('here')
+
         return Response({}, status=status.HTTP_200_OK)   
     
     
@@ -168,9 +168,14 @@ class OneGameModelAPI(APIView):
     #used when we need to get one game or alter a game.
     def get(self, request, id, *args, **kwargs):
 
-        Games = GameModel.objects.get(id=id)
-        serializer = GamesSerializer(Games)
-        return Response(serializer.data)
+        try:
+            Games = GameModel.objects.get(id=id)
+            serializer = GamesSerializer(Games)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            print(e)
+            return Response({'status':'Problem'}, status=status.HTTP_400_BAD_REQUEST)
     
     def post(self, request,*args, **kwargs):
 
@@ -185,15 +190,31 @@ class OneGameModelAPI(APIView):
         #
         #print(serializer.errors)
         return Response({'error':'invalid data'}, status=status.HTTP_400_BAD_REQUEST)
-
-        
     
     def delete(self, request,id,*args, **kwargs):
 
         try:
             thisRecord = GameModel.objects.get(id=id)
             thisRecord.delete()
-        except:
+        except ProtectedError:
+            print('protected error')
+            for oneSection in SectionThrough.objects.filter(game=thisRecord):
+                if oneSection.need_to_protect():
+                    return Response({'status':'protected'}, status=status.HTTP_403_FORBIDDEN)  
+            
+            try:
+                for oneSection in SectionThrough.objects.filter(game=thisRecord):
+                    for oneplayedgame in PlayedGameModel.objects.filter(which_game=oneSection):
+                        oneplayedgame.delete()
+                    oneSection.delete()
+            
+                thisRecord.delete() 
+            except Exception as e:
+                print('other protected error')
+                print(e)
+                return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         
         return Response({}, status=status.HTTP_200_OK)
@@ -247,7 +268,7 @@ class SectionsAPI(APIView):
         return Response(serializer.data)
     
     def post(self, request,*args, **kwargs):
-        print(request.data)
+        #print(request.data)
         try:
             serializer = SectionSerializer(data=request.data)
             if serializer.is_valid():
@@ -295,9 +316,24 @@ class SectionsThroughAPI(APIView):
 
         try:
             AllItems = SectionThrough.objects.all()
-            serializer = SectionThroughSerializer(AllItems, many=True)
-            print(serializer.data)
+            #serializer = SectionThroughSerializer(AllItems, many=True)
+            serializer = SectionThroughSerializerSimple(AllItems, many=True)
+            #print(serializer.data)
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             print(e)
             return Response({'status':'error'}, status=status.HTTP_400_BAD_REQUEST)
+        
+    def post(self, request, *args, **kwargs):
+
+        print(request.data)
+        try:
+            serializer = SectionThroughSerializerSimple(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data, status=status.HTTP_201_CREATED)            
+        except Exception as e:
+            print(e)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        

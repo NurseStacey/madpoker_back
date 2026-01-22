@@ -28,6 +28,7 @@ class GameModel(models.Model):
     venue=models.ForeignKey(VenueModel, null=True, on_delete=models.PROTECT)
     all_sections=models.ManyToManyField(SectionModel,through='SectionThrough', related_name='game_sections')
     active=models.BooleanField(default=True)  
+    director=models.ForeignKey(UserModel, on_delete=models.SET_NULL, null=True)
 
     def get_dates(self):
         datelist = [{'date':x.date,'id':x.id} for x in self.game_details.all()]
@@ -80,7 +81,20 @@ class SectionThrough(models.Model):
     game=models.ForeignKey(GameModel, on_delete=models.PROTECT)
     director=models.ForeignKey(UserModel, null=True, on_delete=models.SET_NULL)
     active=models.BooleanField(default=True)  
-    description=models.CharField(max_length=250, null=True)  
+    description=models.CharField(max_length=250, null=True)
+
+    def need_to_protect(self):
+
+        try:
+            if len(PlayedGameModel.objects.filter(which_game=self))==0:
+                return False
+            for onePlayedGame in PlayedGameModel.objects.filter(which_game=self):
+                if onePlayedGame.date<date.today() and len(onePlayedGame.player_results.all()):
+                    return True
+            
+            return False
+        except Exception as e:
+            print(e)
 
 class GameResultModel(models.Model):
     player=models.ForeignKey(PlayerModel,  default=PlayerModel.get_default_pk, on_delete=models.PROTECT)
@@ -88,11 +102,14 @@ class GameResultModel(models.Model):
     registration_date_time=models.DateTimeField(default=timezone.now)
 
 class PlayedGameModel(models.Model):
-    which_game= models.ForeignKey(GameModel, on_delete=models.PROTECT, default=GameModel.get_default_pk, related_name='game_details')
+    which_game= models.ForeignKey(SectionThrough, on_delete=models.PROTECT, default=GameModel.get_default_pk, related_name='played_games')
     date= models.DateField(default=timezone.now)
     player_results=models.ManyToManyField(GameResultModel)
-    #players=models.ManyToManyField(PlayerModel,  default=PlayerModel.get_default_pk)
+    finalized=models.BooleanField(default=False)
 
+    def __repr__(self):
+        return self(date.strftime('%m-%d'))
+    
     def get_players(self):
 
         return_value=[]
