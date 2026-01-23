@@ -5,7 +5,7 @@ from .models import *
 from .serializers import *
 from rest_framework.permissions import AllowAny
 from rest_framework import status
-
+from django.db.utils import IntegrityError
 
 class PlayersAPI(APIView):
 
@@ -26,7 +26,14 @@ class PlayersAPI(APIView):
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
             else:
                 print(serializer.error_messages)
+        except IntegrityError:
+            print('here')
+            return Response(serializer.errors, status=status.HTTP_409_CONFLICT)
         except Exception as e:
+            print(serializer.errors)
+            if 'player' in serializer.errors:
+                if 'unique' in [x.code for x in serializer.errors['player']]:
+                    return Response({'status':'duplicit username'}, status=status.HTTP_409_CONFLICT)
             print(e)
 
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)

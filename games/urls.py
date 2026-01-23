@@ -16,5 +16,6 @@ urlpatterns = [
     path('remove_layer_from_game/<int:id>/',GameResultsAPI.as_view(), name='remove_layer_from_game'),    
     path('sections/',SectionsAPI.as_view(), name='sections'),        
     path('one_section/<int:id>/',SectionsAPI.as_view(), name='one_event'),
-    path('sectionthrough/',SectionsThroughAPI.as_view(), name='section_through'),       
+    path('sectionthrough/',SectionsThroughAPI.as_view(), name='section_through'),
+    path('one_sectionthrough/<int:id>/',SectionsThroughAPI.as_view(), name='one_section_through'),
 ]

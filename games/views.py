@@ -306,6 +306,7 @@ class SectionsAPI(APIView):
         return Response({}, status=status.HTTP_200_OK)
     
     def patch(self, request,id,*args, **kwargs):
+
         try:
             thisRecord = SectionModel.objects.get(id=id)
             serializer = SectionSerializer(thisRecord, data=request.data, partial=True)
@@ -344,4 +345,17 @@ class SectionsThroughAPI(APIView):
             print(e)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+    def patch(self, request,id,*args, **kwargs):
+        print('here')
+        try:
+            thisRecord = SectionThrough.objects.get(id=id)
+            serializer = SectionThroughSerializerSimple(thisRecord, data=request.data, partial=True)
+            
+            if serializer.is_valid():
+                serializer.save()
+        except:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({}, status=status.HTTP_200_OK)      
         
