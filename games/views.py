@@ -117,10 +117,18 @@ class GameModelAPI(APIView):
             
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        SectionThrough.objects.create(
+        thisRecord=SectionThrough(
             section=SectionModel.objects.get(name='Texas Holdem'),
             game=GameModel.objects.get(id=serializer.data['id'])
         )
+        thisRecord.save()
+        try:
+            thisDirector = UserModel.objects.get(id=request.data['director'])
+            thisRecord.director=thisDirector
+            thisRecord.save()
+        except:
+            pass
+        
         return Response(serializer.data, status=status.HTTP_201_CREATED)
 
 class SeasonModelAPI(APIView):
