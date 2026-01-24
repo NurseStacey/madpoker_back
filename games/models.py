@@ -81,7 +81,7 @@ class SectionThrough(models.Model):
     game=models.ForeignKey(GameModel, on_delete=models.PROTECT)
     director=models.ForeignKey(UserModel, null=True, on_delete=models.SET_NULL)
     active=models.BooleanField(default=True)  
-    description=models.CharField(max_length=250, null=True)
+    description=models.CharField(max_length=250, null=True, blank=True)
 
     def need_to_protect(self):
 

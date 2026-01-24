@@ -16,16 +16,14 @@ class PlayersAPI(APIView):
         return Response(serializer.data)
     
     def post(self, request,*args, **kwargs):
-
         try:
 
             serializer = PlayersSerializer(data=request.data)
 
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data, status=status.HTTP_201_CREATED)
-            else:
-                print(serializer.error_messages)
+            serializer.is_valid()
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+
         except IntegrityError:
             print('here')
             return Response(serializer.errors, status=status.HTTP_409_CONFLICT)

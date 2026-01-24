@@ -119,7 +119,8 @@ class GameModelAPI(APIView):
 
         thisRecord=SectionThrough(
             section=SectionModel.objects.get(name='Texas Holdem'),
-            game=GameModel.objects.get(id=serializer.data['id'])
+            game=GameModel.objects.get(id=serializer.data['id']),
+            description=request.data['description']
         )
         thisRecord.save()
         try:
@@ -181,6 +182,7 @@ class OneGameModelAPI(APIView):
             serializer = GamesSerializer(Games)
             return Response(serializer.data, status=status.HTTP_200_OK)
 
+
         except Exception as e:
             print(e)
             return Response({'status':'Problem'}, status=status.HTTP_400_BAD_REQUEST)
@@ -228,14 +230,26 @@ class OneGameModelAPI(APIView):
         return Response({}, status=status.HTTP_200_OK)
     
     def patch(self, request,id,*args, **kwargs):
-        print(request.data)
+        print("patch")
         try:
             thisRecord = GameModel.objects.get(id=id)
             serializer = GamesSerializer(thisRecord, data=request.data, partial=True)
-            print(request.data)
+            #print(request.data)
             if serializer.is_valid():
                 serializer.save()
-                
+
+            SectionToUpdate=None
+            AllSectionThrough=SectionThrough.objects.filter(game=thisRecord)
+            if AllSectionThrough.count()==1:
+                SectionToUpdate=AllSectionThrough[0]
+            elif AllSectionThrough.filter(section=SectionModel.objects.get(name='Texas Holdem')).count()==1:
+                SectionToUpdate=AllSectionThrough.get(section=SectionModel.objects.get(name='Texas Holdem'))
+            else:
+                return Response({'status':'no section updated'}, status=status.HTTP_200_OK)
+            
+            SectionToUpdate.director=UserModel.objects.get(id=request.data['director'])
+            SectionToUpdate.description=request.data['description']
+            SectionToUpdate.save()
         except:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         
@@ -342,7 +356,7 @@ class SectionsThroughAPI(APIView):
                 serializer.save()
                 return Response(serializer.data, status=status.HTTP_201_CREATED)            
         except Exception as e:
-            print(e)
+            print(serializer.errors)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
