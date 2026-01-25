@@ -40,23 +40,23 @@ class GamesSerializer(serializers.ModelSerializer):
     #     else:
     #         return obj.venue.venue_name     
     
-class GamesForPlayersSerializer(serializers.ModelSerializer):
+# class GamesForPlayersSerializer(serializers.ModelSerializer):
 
-    venue_name = serializers.SerializerMethodField()
-    NextPlayerGameID = serializers.SerializerMethodField()
+#     venue_name = serializers.SerializerMethodField()
+#     NextPlayerGameID = serializers.SerializerMethodField()
 
-    class Meta:
-        model = GameModel
-        fields =('id', 'venue_name', 'NextPlayerGameID','description', 'time', 'week_day') 
+#     class Meta:
+#         model = GameModel
+#         fields =('id', 'venue_name', 'NextPlayerGameID','description', 'time', 'week_day') 
 
-    def get_NextPlayerGameID(self, obj):
-        return obj.GetNextGameID()
+#     def get_NextPlayerGameID(self, obj):
+#         return obj.GetNextGameID()
 
-    def get_venue_name(self,obj):
-        if obj.venue==None:
-            return ''
-        else:
-            return obj.venue.venue_name 
+#     def get_venue_name(self,obj):
+#         if obj.venue==None:
+#             return ''
+#         else:
+#             return obj.venue.venue_name 
     
 class PlayedGamesSerializer(serializers.ModelSerializer):
 
@@ -99,11 +99,10 @@ class SectionThroughSerializer(serializers.ModelSerializer):
             return obj.director.username
         except:
             return ''
-# class GameSerializerNew(serializers.ModelSerializer):
 
-#     venue_name = serializers.CharField(source='venue.venue_name', read_only=True)
-#     events = EventThroughSerializer(source='EventThrough', many=True, read_only=True)
-
-#     class Meta:
-#         model = GameModel
-#         fields = ['week_day', 'time','venue_name','description','events'],
+class SectionThroughForLocations(serializers.ModelSerializer):
+    venue = serializers.CharField(source='game.venue.venue_name', read_only=True)
+    
+    class Meta:
+        model = SectionThrough
+        fields='__all__'

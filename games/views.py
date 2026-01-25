@@ -8,6 +8,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework import status
 from players.serializers import PlayersSerializer
 from django.db.models import ProtectedError
+from django.http import JsonResponse
 
 class GameResultsAPI(APIView):
     #only used for removing a player from the roster
@@ -71,6 +72,17 @@ def RegisterForGame(PlayerID, GameID):
 class GamesRegistrationsAPI(APIView):
 #used for registering for a game
     def post(self, request,*args, **kwargs):
+
+        try:
+            whichPlayedGame=PlayedGameModel.objects.filter(which_game=request.data['which_game']).latest('date')
+            if (whichPlayedGame.date<datetime.today()):
+                whichPlayedGame=PlayedGameModel(
+                    which_game=request.data['which_game'],
+                    date=whichPlayedGame
+                )
+        except:
+            pass
+
         return RegisterForGame(request.data['WhichPlayer'],request.data['which_game'])
 
 class GamesByDirectorAPI(APIView):
@@ -237,21 +249,30 @@ class OneGameModelAPI(APIView):
             #print(request.data)
             if serializer.is_valid():
                 serializer.save()
+        except:
+            return Response({'status':'trouble with updating game'}, status=status.HTTP_400_BAD_REQUEST)
 
+        try:
             SectionToUpdate=None
             AllSectionThrough=SectionThrough.objects.filter(game=thisRecord)
+            
             if AllSectionThrough.count()==1:
                 SectionToUpdate=AllSectionThrough[0]
+                
             elif AllSectionThrough.filter(section=SectionModel.objects.get(name='Texas Holdem')).count()==1:
+                print('three')
                 SectionToUpdate=AllSectionThrough.get(section=SectionModel.objects.get(name='Texas Holdem'))
             else:
                 return Response({'status':'no section updated'}, status=status.HTTP_200_OK)
             
             SectionToUpdate.director=UserModel.objects.get(id=request.data['director'])
+            print(request.data)
             SectionToUpdate.description=request.data['description']
+            print('one')
             SectionToUpdate.save()
+            print('two')
         except:
-            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status':'trouble with section'}, status=status.HTTP_400_BAD_REQUEST)
         
         return Response({}, status=status.HTTP_200_OK)   
 
@@ -339,9 +360,9 @@ class SectionsThroughAPI(APIView):
 
         try:
             AllItems = SectionThrough.objects.all()
-            #serializer = SectionThroughSerializer(AllItems, many=True)
+
             serializer = SectionThroughSerializerSimple(AllItems, many=True)
-            #print(serializer.data)
+
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
             print(e)
@@ -361,7 +382,6 @@ class SectionsThroughAPI(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def patch(self, request,id,*args, **kwargs):
-        print('here')
         try:
             thisRecord = SectionThrough.objects.get(id=id)
             serializer = SectionThroughSerializerSimple(thisRecord, data=request.data, partial=True)
@@ -373,3 +393,34 @@ class SectionsThroughAPI(APIView):
         
         return Response({}, status=status.HTTP_200_OK)      
         
+def InfoForLocations(request, *args, **kwargs):
+
+    return_values = {
+        "Sunday":[],
+        "Monday":[],
+        "Tuesday":[],
+        "Wednesday":[],
+        "Thurseday":[],
+        "Friday":[],
+        "Saturday":[],
+    }
+
+    try:
+        for one_game in GameModel.objects.filter(active=True).order_by('time'):
+            this_dictionary={
+                'venue_name':one_game.venue.venue_name,                
+                'sections':[],
+                'time':one_game.time,
+            }
+            for one_section in SectionThrough.objects.filter(active=True).filter(game=one_game):
+                this_dictionary['sections'].append({
+                    'description':one_section.description,
+                    'id':one_section.id,
+                    'event':one_section.section.name,
+                    'played_game_id':one_section.GetNextPlayedGameID()
+                })
+            return_values[one_game.week_day].append(this_dictionary)
+    except:
+        return JsonResponse({'data':[]})
+
+    return JsonResponse({'data':return_values})

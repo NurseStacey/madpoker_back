@@ -29,6 +29,8 @@ class GameModel(models.Model):
     all_sections=models.ManyToManyField(SectionModel,through='SectionThrough', related_name='game_sections')
     active=models.BooleanField(default=True)  
     director=models.ForeignKey(UserModel, on_delete=models.SET_NULL, null=True)
+    description=models.CharField(max_length=250, null=True, blank=True)
+
 
     def get_dates(self):
         datelist = [{'date':x.date,'id':x.id} for x in self.game_details.all()]
@@ -37,26 +39,7 @@ class GameModel(models.Model):
 
     def get_simple_text(self):
         return('{} - {}'.format(self.venue.venue_name, self.week_day))
-    
-    def GetNextGameID(self):
-        Today=date.today()
-        next_game=self.game_details.all().order_by('-date').first()
 
-        if next_game==None or (next_game.date-Today).days<0:
-  
-            today_weekday = (Today.weekday()+1 % 7) #0 is Monday here.  0 is Sunday in model
-
-            offset=WeekDayNumbers[self.week_day]-today_weekday
-            if offset<0:
-                offset+=7
-
-            next_game = PlayedGameModel(
-                which_game=self,
-                date = (date(Today.year, Today.month, Today.day)+timedelta(days=offset))
-            )
-            next_game.save()
-        
-        return next_game.id
 
     def GetText(self):
         try:
@@ -95,6 +78,27 @@ class SectionThrough(models.Model):
             return False
         except Exception as e:
             print(e)
+
+    
+    def GetNextPlayedGameID(self):
+        Today=date.today()
+        next_game=self.played_games.all().latest('date')
+
+        if next_game==None or (next_game.date-Today).days<0:
+  
+            today_weekday = (Today.weekday()+1 % 7) #0 is Monday here.  0 is Sunday in model
+
+            offset=WeekDayNumbers[self.game.week_day]-today_weekday
+            if offset<0:
+                offset+=7
+
+            next_game = PlayedGameModel(
+                which_game=self,
+                date = (date(Today.year, Today.month, Today.day)+timedelta(days=offset))
+            )
+            next_game.save()
+        
+        return next_game.id            
 
 class GameResultModel(models.Model):
     player=models.ForeignKey(PlayerModel,  default=PlayerModel.get_default_pk, on_delete=models.PROTECT)
