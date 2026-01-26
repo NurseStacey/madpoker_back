@@ -82,7 +82,12 @@ class SectionThrough(models.Model):
     
     def GetNextPlayedGameID(self):
         Today=date.today()
-        next_game=self.played_games.all().latest('date')
+
+        next_game=None
+        try:
+            next_game=self.played_games.all().latest('date')
+        except:
+            pass
 
         if next_game==None or (next_game.date-Today).days<0:
   
@@ -100,15 +105,11 @@ class SectionThrough(models.Model):
         
         return next_game.id            
 
-class GameResultModel(models.Model):
-    player=models.ForeignKey(PlayerModel,  default=PlayerModel.get_default_pk, on_delete=models.PROTECT)
-    position=models.IntegerField(default=-1)
-    registration_date_time=models.DateTimeField(default=timezone.now)
 
 class PlayedGameModel(models.Model):
     which_game= models.ForeignKey(SectionThrough, on_delete=models.PROTECT, default=GameModel.get_default_pk, related_name='played_games')
     date= models.DateField(default=timezone.now)
-    player_results=models.ManyToManyField(GameResultModel)
+    #player_results=models.ManyToManyField(GameResultModel)
     finalized=models.BooleanField(default=False)
 
     def __repr__(self):
@@ -130,4 +131,14 @@ class PlayedGameModel(models.Model):
             })
 
         return return_value
-    
+
+class GameResultModel(models.Model):
+    player=models.ForeignKey(PlayerModel,  default=PlayerModel.get_default_pk, on_delete=models.PROTECT)
+    position=models.IntegerField(default=-1)
+    registration_date_time=models.DateTimeField(default=timezone.now)
+    game=models.ForeignKey(PlayedGameModel, null=True, on_delete=models.PROTECT)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['game', 'player'], name='unique_registration')
+        ]

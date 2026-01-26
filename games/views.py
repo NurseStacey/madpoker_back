@@ -74,16 +74,21 @@ class GamesRegistrationsAPI(APIView):
     def post(self, request,*args, **kwargs):
 
         try:
-            whichPlayedGame=PlayedGameModel.objects.filter(which_game=request.data['which_game']).latest('date')
-            if (whichPlayedGame.date<datetime.today()):
-                whichPlayedGame=PlayedGameModel(
-                    which_game=request.data['which_game'],
-                    date=whichPlayedGame
-                )
-        except:
-            pass
+            GameResultModel.objects.create(
+                player=PlayerModel.objects.get(id=request.data['which_player']),
+                game=PlayedGameModel.objects.get(id=request.data['which_game'])
+            )
+            # whichPlayedGame=PlayedGameModel.objects.filter(id=request.data['which_game'])
+            # newGameResultRecord = GameResultModel(player=PlayerModel.objects.get(id=request.data['which_player']))
+            # newGameResultRecord.save()
+            # whichPlayedGame.player_results.add(newGameResultRecord)
+        except Exception as e:
+            if 'UNIQUE' in e.args[0]:
+                return Response({'status':'duplicate'}, status=status.HTTP_409_CONFLICT)    
+            print(e)
+            return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)
 
-        return RegisterForGame(request.data['WhichPlayer'],request.data['which_game'])
+        return Response({'status':'player added'}, status=status.HTTP_201_CREATED)
 
 class GamesByDirectorAPI(APIView):
     #used if we need the games assigned to one director
