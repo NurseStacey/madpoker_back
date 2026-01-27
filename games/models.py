@@ -107,13 +107,16 @@ class SectionThrough(models.Model):
 
 
 class PlayedGameModel(models.Model):
-    which_game= models.ForeignKey(SectionThrough, on_delete=models.PROTECT, default=GameModel.get_default_pk, related_name='played_games')
+    which_game= models.ForeignKey(SectionThrough, 
+                                  on_delete=models.PROTECT, 
+                                  default=GameModel.get_default_pk, 
+                                  related_name='played_games')
     date= models.DateField(default=timezone.now)
-    #player_results=models.ManyToManyField(GameResultModel)
+
     finalized=models.BooleanField(default=False)
 
     def __repr__(self):
-        return self(date.strftime('%m-%d'))
+        return self.date.strftime('%m-%d')
     
     def get_players(self):
 

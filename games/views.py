@@ -26,10 +26,14 @@ class GameRostersAPI(APIView):
 #used to get roster for  director
     def get(self, request, id, *args, **kwargs):
 
-        print(id)
-        thisGame = PlayedGameModel.objects.get(id=id)
-        serializer = PlayedGamesSerializer(thisGame, many=False)
-        return Response(serializer.data)
+        try:
+            thisGame = PlayedGameModel.objects.get(id=id)
+            serializer = GameResultsSerializer(GameResultModel.objects.filter(game=thisGame), many=True)
+            #print(serializer.data)
+            return Response(serializer.data)
+        except Exception as e:
+            print(e)
+            return Response({'status':'problem'})
 
 class NewPlayerRegistrationAPI(APIView):
 #used for registering a new player and signing up for game
@@ -78,10 +82,7 @@ class GamesRegistrationsAPI(APIView):
                 player=PlayerModel.objects.get(id=request.data['which_player']),
                 game=PlayedGameModel.objects.get(id=request.data['which_game'])
             )
-            # whichPlayedGame=PlayedGameModel.objects.filter(id=request.data['which_game'])
-            # newGameResultRecord = GameResultModel(player=PlayerModel.objects.get(id=request.data['which_player']))
-            # newGameResultRecord.save()
-            # whichPlayedGame.player_results.add(newGameResultRecord)
+           
         except Exception as e:
             if 'UNIQUE' in e.args[0]:
                 return Response({'status':'duplicate'}, status=status.HTTP_409_CONFLICT)    
@@ -94,19 +95,14 @@ class GamesByDirectorAPI(APIView):
     #used if we need the games assigned to one director
     def get(self, request, id,  *args, **kwargs):
 
-    
         if id<0:
             return Response({'status':'error'}, status=status.HTTP_400_BAD_REQUEST)
-        
         try:
-            Games = GameModel.objects.filter(director=UserModel.objects.get(id=id))
-          
-            serializer = GamesSerializer(Games, many=True)
-           
+            Sections = SectionThrough.objects.filter(director=UserModel.objects.get(id=id)).filter(active=True)
+            serializer = SectionThroughSerializer(Sections, many=True)
         except Exception as e:
             print(e)
             return Response({'status':'error'}, status=status.HTTP_400_BAD_REQUEST)
-        
 
         return Response(serializer.data, status=status.HTTP_201_CREATED)
         

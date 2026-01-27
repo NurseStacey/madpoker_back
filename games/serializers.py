@@ -1,5 +1,6 @@
 from rest_framework import serializers
 from .models import *
+from zoneinfo import ZoneInfo
 
 class SeasonSerializer(serializers.ModelSerializer):
     class Meta:
@@ -84,15 +85,26 @@ class SectionThroughSerializerSimple(serializers.ModelSerializer):
 class SectionThroughSerializer(serializers.ModelSerializer):
     section_name = serializers.CharField(source='section.name', read_only=True)
     director_name = serializers.CharField(default='', source='director.username', read_only=True)
-    #director_name = serializers.SerializerMethodField()
+    venue_name = serializers.CharField(default='', source='game.venue.venue_name', read_only=True)
+    week_day = serializers.CharField(default='', source='game.week_day', read_only=True)
+    time = serializers.CharField(default='', source='game.time      ', read_only=True)
     game_text=serializers.SerializerMethodField()
+    all_dates=serializers.SerializerMethodField()
 
     class Meta:
         model = SectionThrough
-        fields = ['section_name','game_text', 'director_name', 'active','id']        
+        fields = ['game_text','time','section_name','week_day', 'director_name', 'active','id','venue_name', 'all_dates']        
 
+    def get_all_dates(self, obj):
+        return list({'id':y.id,'date':y.date.strftime('%m-%d-%Y')} for y in obj.played_games.all())
+    
     def get_game_text(self, obj):
-        return obj.game.GetText()
+        venue_name = obj.game.venue.venue_name
+        week_day=obj.game.week_day
+        time=obj.game.time
+        event=obj.section.name
+
+        return venue_name + ' - ' + time + ' - ' + week_day + ' - ' + event
     
     def get_director_name(self, obj):
         try:
@@ -106,3 +118,16 @@ class SectionThroughForLocations(serializers.ModelSerializer):
     class Meta:
         model = SectionThrough
         fields='__all__'
+
+class GameResultsSerializer(serializers.ModelSerializer):
+    player_name = serializers.CharField(source='player.player', read_only=True)
+    registration_date_time_str = serializers.SerializerMethodField()
+
+    class Meta:
+        model=GameResultModel
+        fields='__all__'
+    
+    def get_registration_date_time_str(self, obj):
+        pacific_timezone = ZoneInfo('America/Los_Angeles')
+        thisDate=obj.registration_date_time.astimezone(pacific_timezone)
+        return thisDate.strftime('%m-%d-%Y  %H:%M')
