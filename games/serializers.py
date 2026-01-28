@@ -15,7 +15,7 @@ class SeasonSerializer(serializers.ModelSerializer):
 #         return super().to_representation(value)
     
 class GamesSerializer(serializers.ModelSerializer):
-    Text = serializers.SerializerMethodField()
+    game_text = serializers.SerializerMethodField()
     #director=CustomForiegnField(allow_null=True)
     #venue_name = serializers.SerializerMethodField()
     #NextPlayerGameID = serializers.SerializerMethodField()
@@ -29,7 +29,7 @@ class GamesSerializer(serializers.ModelSerializer):
     # def get_Dates(self, obj):
     #     return obj.get_dates()
     
-    def get_Text(self,obj):
+    def get_game_text(self,obj):
         return obj.GetText()
     
     # def get_NextPlayerGameID(self, obj):

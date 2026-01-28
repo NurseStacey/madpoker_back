@@ -91,12 +91,24 @@ class GamesRegistrationsAPI(APIView):
 
         return Response({'status':'player added'}, status=status.HTTP_201_CREATED)
 
+class AllSectionsAPI(APIView):
+    def get(self, request, *args, **kwargs):
+
+        try:
+            Sections = SectionThrough.objects.filter(active=True)
+            serializer = SectionThroughSerializer(Sections, many=True)
+        except Exception as e:
+            print(e)
+            return Response({'status':'error'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response(serializer.data, status=status.HTTP_200_OK)
+        
 class GamesByDirectorAPI(APIView):
     #used if we need the games assigned to one director
     def get(self, request, id,  *args, **kwargs):
 
         if id<0:
-            return Response({'status':'error'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status':'error'}, status=status.HTTP_200_OK)
         try:
             Sections = SectionThrough.objects.filter(director=UserModel.objects.get(id=id)).filter(active=True)
             serializer = SectionThroughSerializer(Sections, many=True)
