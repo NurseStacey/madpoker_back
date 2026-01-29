@@ -12,6 +12,7 @@ urlpatterns = [
     path('register_player_for_game/', GamesRegistrationsAPI.as_view(), name='games-for-player'),    
     path('register_new_player_for_game/', NewPlayerRegistrationAPI.as_view(), name='games-for-player'),    
     path('game_roster/<int:id>/', GameRostersAPI.as_view(), name='games-for-player'), 
+    path('played_games_events/<int:id>/', PlayedGamesEvents.as_view(), name='events-for-player'),     
     path('update_roster/',UpdateRosterAPI.as_view(), name='update_roster'),
     path('remove_layer_from_game/<int:id>/',GameResultsAPI.as_view(), name='remove_layer_from_game'),    
     path('sections/',SectionsAPI.as_view(), name='sections'), 

@@ -21,7 +21,17 @@ class GameResultsAPI(APIView):
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         
         return Response({}, status=status.HTTP_200_OK)
-            
+
+class PlayedGamesEvents(APIView):
+    def get(self, request,  id, *args, **kwargs):
+
+        try:
+            thisGame = PlayedGameModel.objects.get(id=id)
+            print(thisGame.get_other_events())
+            return Response(thisGame.get_other_events(),)
+        except:
+            return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)        
+        
 class GameRostersAPI(APIView):
 #used to get roster for  director
     def get(self, request, id, *args, **kwargs):
@@ -29,11 +39,12 @@ class GameRostersAPI(APIView):
         try:
             thisGame = PlayedGameModel.objects.get(id=id)
             serializer = GameResultsSerializer(GameResultModel.objects.filter(game=thisGame), many=True)
-            #print(serializer.data)
-            return Response(serializer.data)
+
+            return Response(serializer.data,)
+        
         except Exception as e:
             print(e)
-            return Response({'status':'problem'})
+            return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)
 
 class NewPlayerRegistrationAPI(APIView):
 #used for registering a new player and signing up for game
@@ -218,6 +229,16 @@ class OneGameModelAPI(APIView):
             serializer = GamesSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
+
+                TexasHoldemSection=SectionModel.objects.get(name='Texas Holdem')
+                try:
+                    thisSectionThrough=SectionThrough.objects.filter(game=request.data['id']).get(section=TexasHoldemSection)
+                    thisSectionThrough.description=request.data['description']
+                    thisSectionThrough.save()
+                    print('section  updated')
+                except:
+                    pass
+
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
         except:
             
@@ -396,11 +417,20 @@ class SectionsThroughAPI(APIView):
     
     def patch(self, request,id,*args, **kwargs):
         try:
-            thisRecord = SectionThrough.objects.get(id=id)
-            serializer = SectionThroughSerializerSimple(thisRecord, data=request.data, partial=True)
             
+            thisRecord = SectionThrough.objects.get(id=id)
+
+            serializer = SectionThroughSerializerSimple(thisRecord, data=request.data, partial=True)
+
             if serializer.is_valid():
                 serializer.save()
+             
+                if thisRecord.section.name=='Texas Holdem':
+                    thisGame=thisRecord.game
+                    print(thisGame.venue.venue_name)
+                    #print(request.data('description'))
+                    thisGame.description=request.data['description']
+                    thisGame.save()
         except:
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
         

@@ -115,6 +115,11 @@ class PlayedGameModel(models.Model):
 
     finalized=models.BooleanField(default=False)
 
+    def get_other_events(self):
+        section_through=self.which_game
+        
+        return [{'event_name':x.name,'id':x.id} for x in  section_through.game.all_sections.all() if x.name!=self.which_game.section.name]
+    
     def __repr__(self):
         return self.date.strftime('%m-%d')
     
