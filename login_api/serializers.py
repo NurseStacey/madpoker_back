@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model =UserModel 
-        fields = ('id', 'username', 'email')
+        fields = ('id', 'username', 'email', 'is_superuser')
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only=True)
@@ -35,6 +35,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
 class UserLoginSerializer(serializers.Serializer):
     email = serializers.CharField()
     password = serializers.CharField(write_only=True)
+    #is_superuser = serializers.BooleanField()
 
     def validate(self, data):
         user=authenticate(**data)

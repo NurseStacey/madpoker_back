@@ -109,16 +109,19 @@ class SectionThrough(models.Model):
 class PlayedGameModel(models.Model):
     which_game= models.ForeignKey(SectionThrough, 
                                   on_delete=models.PROTECT, 
-                                  default=GameModel.get_default_pk, 
+                                  null=True, 
                                   related_name='played_games')
     date= models.DateField(default=timezone.now)
-
     finalized=models.BooleanField(default=False)
 
     def get_other_events(self):
-        section_through=self.which_game
-        
-        return [{'event_name':x.name,'id':x.id} for x in  section_through.game.all_sections.all() if x.name!=self.which_game.section.name]
+
+        sections_this_date = PlayedGameModel.objects.filter(date=self.date)
+        the_game=self.which_game.game
+        these_sections = [x for x in sections_this_date if x.which_game.game==the_game and x.which_game.section!=self.which_game.section]
+        return_value=[{'event_name':x.which_game.section.name,'id':x.id } for x in these_sections]
+
+        return return_value
     
     def __repr__(self):
         return self.date.strftime('%m-%d')
@@ -142,7 +145,7 @@ class PlayedGameModel(models.Model):
 
 class GameResultModel(models.Model):
     player=models.ForeignKey(PlayerModel,  default=PlayerModel.get_default_pk, on_delete=models.PROTECT)
-    position=models.IntegerField(default=-1)
+    position=models.IntegerField(default=0)
     registration_date_time=models.DateTimeField(default=timezone.now)
     game=models.ForeignKey(PlayedGameModel, null=True, on_delete=models.PROTECT)
 

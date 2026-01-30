@@ -27,10 +27,21 @@ class PlayedGamesEvents(APIView):
 
         try:
             thisGame = PlayedGameModel.objects.get(id=id)
-            print(thisGame.get_other_events())
-            return Response(thisGame.get_other_events(),)
+            
+            return Response(thisGame.get_other_events(),status=status.HTTP_200_OK)
         except:
-            return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)        
+            return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self,request,id,*args,**kwargs):
+        try:
+            thisGame = PlayedGameModel.objects.get(id=id)
+            thisGame.finalized=request.data['finalized']
+            thisGame.save()
+            
+            return Response({'status':'finalized'},status=status.HTTP_200_OK)
+        except:
+            return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)
+
         
 class GameRostersAPI(APIView):
 #used to get roster for  director
@@ -89,6 +100,9 @@ class GamesRegistrationsAPI(APIView):
     def post(self, request,*args, **kwargs):
 
         try:
+            if PlayedGameModel.objects.get(id=request.data['which_game']).finalized:
+                return Response({'status':'duplicate'}, status=status.HTTP_423_LOCKED) 
+            
             GameResultModel.objects.create(
                 player=PlayerModel.objects.get(id=request.data['which_player']),
                 game=PlayedGameModel.objects.get(id=request.data['which_game'])

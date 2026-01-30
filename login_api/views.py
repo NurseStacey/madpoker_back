@@ -37,14 +37,18 @@ class UserLoginAPIView(GenericAPIView):
 
     
     def post(self, request, *args, **kwargs):
-        serializer=self.get_serializer(data=request.data)
-        serializer.is_valid(raise_exception=True)
-        user=serializer.validated_data
-        serializer=CustomUserSerializer(user)
-        token=RefreshToken.for_user(user)
-        data = serializer.data
-        data['tokens']={'refresh':str(token),
-                        'access':str(token.access_token)}
+        try:
+            serializer=self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            user=serializer.validated_data
+            serializer=CustomUserSerializer(user)
+            token=RefreshToken.for_user(user)
+            data = serializer.data
+            data['tokens']={'refresh':str(token),
+                            'access':str(token.access_token)}
+        except Exception as e:
+            print(e)
+            return Response(data, status=status.HTTP_401_UNAUTHORIZED)
         
         return Response(data, status=status.HTTP_200_OK)
     

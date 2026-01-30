@@ -96,7 +96,11 @@ class SectionThroughSerializer(serializers.ModelSerializer):
         fields = ['game_text','time','section_name','week_day', 'director_name', 'active','id','venue_name', 'all_dates']        
 
     def get_all_dates(self, obj):
-        return list({'id':y.id,'date':y.date.strftime('%m-%d-%Y')} for y in obj.played_games.all())
+        return list({
+            'id':y.id,
+            'date':y.date.strftime('%m-%d-%Y'),
+            'canUpdate':not (y.finalized)
+            } for y in obj.played_games.all())
     
     def get_game_text(self, obj):
         venue_name = obj.game.venue.venue_name
