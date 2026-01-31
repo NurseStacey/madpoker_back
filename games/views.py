@@ -192,7 +192,7 @@ class SeasonModelAPI(APIView):
         return Response(serializer.data)
     
     def post(self, request,*args, **kwargs):
-
+        
         try:
             serializer = SeasonSerializer(data=request.data)
             if serializer.is_valid():
@@ -207,7 +207,7 @@ class SeasonModelAPI(APIView):
             
     def patch(self, request,id,*args, **kwargs):
         try:
-
+            print(request.data)
             thisRecord = SeasonModel.objects.get(id=id)
             serializer = SeasonSerializer(thisRecord, data=request.data, partial=True)
             if serializer.is_valid():

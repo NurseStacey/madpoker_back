@@ -15,9 +15,14 @@ WeekDayNumbers ={
     'Saturday':6
 }
 
+def ThreeMonthsLater():
+    return timezone.now()+timedelta(days=91)
+    
 class SeasonModel(models.Model):
-    season_number=models.CharField(default=0)
+    season=models.CharField(default=0)
     start_date=models.DateField(default=timezone.now)
+    end_date=models.DateField(default=ThreeMonthsLater)
+
 
 class SectionModel(models.Model):
     name=models.CharField(max_length=20, default='Texas Holdem', unique=True)
