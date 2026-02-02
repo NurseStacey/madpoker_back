@@ -2,67 +2,22 @@ from rest_framework import serializers
 from .models import *
 from zoneinfo import ZoneInfo
 
-class SeasonSerializer(serializers.ModelSerializer):
-    class Meta:
-        model = SeasonModel
-        fields ='__all__'    
 
-# class CustomForiegnField(serializers.):
-#     def to_representation(self, value):
-        
-#         if value is None:
-#             return -1  # Change null output to 0
-#         return super().to_representation(value)
     
 class GamesSerializer(serializers.ModelSerializer):
     game_text = serializers.SerializerMethodField()
-    #director=CustomForiegnField(allow_null=True)
-    #venue_name = serializers.SerializerMethodField()
-    #NextPlayerGameID = serializers.SerializerMethodField()
-    #Dates = serializers.SerializerMethodField()
 
     class Meta:
         model = GameModel
         fields ='__all__'    
 
-
-    # def get_Dates(self, obj):
-    #     return obj.get_dates()
-    
     def get_game_text(self,obj):
         return obj.GetText()
-    
-    # def get_NextPlayerGameID(self, obj):
-    #     return obj.GetNextGameID()
-
-    # def get_venue_name(self,obj):
-    #     if obj.venue==None:
-    #         return ''
-    #     else:
-    #         return obj.venue.venue_name     
-    
-# class GamesForPlayersSerializer(serializers.ModelSerializer):
-
-#     venue_name = serializers.SerializerMethodField()
-#     NextPlayerGameID = serializers.SerializerMethodField()
-
-#     class Meta:
-#         model = GameModel
-#         fields =('id', 'venue_name', 'NextPlayerGameID','description', 'time', 'week_day') 
-
-#     def get_NextPlayerGameID(self, obj):
-#         return obj.GetNextGameID()
-
-#     def get_venue_name(self,obj):
-#         if obj.venue==None:
-#             return ''
-#         else:
-#             return obj.venue.venue_name 
     
 class PlayedGamesSerializer(serializers.ModelSerializer):
 
     PlayersArray = serializers.SerializerMethodField()
-    ##Text = serializers.SerializerMethodField()
+    
     class Meta:
         model = PlayedGameModel
         fields =['PlayersArray' ]               
@@ -122,22 +77,3 @@ class SectionThroughForLocations(serializers.ModelSerializer):
     class Meta:
         model = SectionThrough
         fields='__all__'
-
-class GameResultsSerializer(serializers.ModelSerializer):
-    player_name = serializers.CharField(source='player.player', read_only=True)
-    registration_date_time_str = serializers.SerializerMethodField()
-    other_evenets = serializers.SerializerMethodField()
-
-    class Meta:
-        model=GameResultModel
-        fields='__all__'
-    
-    def get_other_evenets(self,obj):
-        thisGame = obj.game.which_game.game
-        theseEvents = [x.name for x in thisGame.all_sections.all()]
-        return theseEvents
-     
-    def get_registration_date_time_str(self, obj):
-        pacific_timezone = ZoneInfo('America/Los_Angeles')
-        thisDate=obj.registration_date_time.astimezone(pacific_timezone)
-        return thisDate.strftime('%m-%d-%Y  %H:%M')

@@ -3,26 +3,7 @@ from login_api.models import UserModel
 from venues.models import VenueModel
 from datetime import date,timedelta,datetime
 from django.utils import timezone
-from players.models import PlayerModel
-
-WeekDayNumbers ={
-    'Sunday':7,
-    'Monday':1,
-    'Tuesday':2,
-    'Wednesday':3,
-    'Thursday':4,
-    'Friday':5,
-    'Saturday':6
-}
-
-def ThreeMonthsLater():
-    return timezone.now()+timedelta(days=91)
-    
-class SeasonModel(models.Model):
-    season=models.CharField(default=0)
-    start_date=models.DateField(default=timezone.now)
-    end_date=models.DateField(default=ThreeMonthsLater)
-
+from seasons.models import SeasonModel
 
 class SectionModel(models.Model):
     name=models.CharField(max_length=20, default='Texas Holdem', unique=True)
@@ -147,14 +128,3 @@ class PlayedGameModel(models.Model):
             })
 
         return return_value
-
-class GameResultModel(models.Model):
-    player=models.ForeignKey(PlayerModel,  default=PlayerModel.get_default_pk, on_delete=models.PROTECT)
-    position=models.IntegerField(default=0)
-    registration_date_time=models.DateTimeField(default=timezone.now)
-    game=models.ForeignKey(PlayedGameModel, null=True, on_delete=models.PROTECT)
-
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(fields=['game', 'player'], name='unique_registration')
-        ]

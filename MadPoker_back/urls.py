@@ -10,5 +10,7 @@ urlpatterns = [
     path('website_data/', include('Website_Data.urls')),
     path('venues/', include('venues.urls')),
     path('games/', include('games.urls')),
-    path('players/', include('players.urls'))
+    path('players/', include('players.urls')),
+    path('seasons/', include('seasons.urls')),
+    path('gameresults/', include('gameresults.urls'))    
 ]

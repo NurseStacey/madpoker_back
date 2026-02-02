@@ -36,6 +36,8 @@ INSTALLED_APPS = [
     'venues',
     'games',
     'players',
+    'seasons',
+    'gameresults',
     'learning'
 ]
 
