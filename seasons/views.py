@@ -5,6 +5,14 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
 
+class SeasonTypeModelAPI(APIView):
+    def get(self, request, *args, **kwargs):
+        #For season types
+        Seasons = SeasonTypeModel.objects.all()
+        serializer = SeasonTypesSerializer(Seasons, many=True)
+
+        return Response(serializer.data)
+        
 class SeasonModelAPI(APIView):
     #For seasons
     def get(self, request, *args, **kwargs):
@@ -16,6 +24,15 @@ class SeasonModelAPI(APIView):
     
     def post(self, request,*args, **kwargs):
         
+        if 'season_type_text' in request.data:
+            obj, created = SeasonTypeModel.objects.get_or_create(
+                season_type=request.data['season_type_text']
+            )
+
+            request.data['season_type']=obj.id
+            del request.data['season_type_text']
+
+            
         try:
             serializer = SeasonSerializer(data=request.data)
             if serializer.is_valid():
