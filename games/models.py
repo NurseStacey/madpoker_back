@@ -3,7 +3,7 @@ from login_api.models import UserModel
 from venues.models import VenueModel
 from datetime import date,timedelta,datetime
 from django.utils import timezone
-from seasons.models import SeasonModel
+from seasons.models import SeasonTypeModel
 
 class SectionModel(models.Model):
     name=models.CharField(max_length=20, default='Texas Holdem', unique=True)
@@ -16,6 +16,7 @@ class GameModel(models.Model):
     active=models.BooleanField(default=True)  
     director=models.ForeignKey(UserModel, on_delete=models.SET_NULL, null=True)
     description=models.CharField(max_length=250, null=True, blank=True)
+    season_type=models.ForeignKey(SeasonTypeModel,  on_delete=models.SET_DEFAULT,default=SeasonTypeModel.get_default_pk )
 
 
     def get_dates(self):

@@ -30,6 +30,16 @@ class AllUserAPIView(GenericAPIView):
         serializer = CustomUserSerializer(all_users, many=True)
         return Response(serializer.data)
     
+    def delete(self, request,id,  *args, **kwargs):
+
+        try:
+            this_users = UserModel.objects.get(id=id)
+            this_users.delete()
+
+            return Response({}, status=status.HTTP_200_OK)  
+        except:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)   
+    
 class UserLoginAPIView(GenericAPIView):
     permission_classes = (AllowAny,)
     serializer_class = UserLoginSerializer
