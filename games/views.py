@@ -16,9 +16,12 @@ class PlayedGamesEvents(APIView):
 
         try:
             thisGame = PlayedGameModel.objects.get(id=id)
-            
-            return Response(thisGame.get_other_events(),status=status.HTTP_200_OK)
-        except:
+            #serializer= PlayedGamesSerializer(thisGame, many=True)
+            #print(serializer.data)
+            return Response({'data':thisGame.get_players()},status=status.HTTP_200_OK)
+        except Exception as e:
+
+            print(e)
             return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self,request,id,*args,**kwargs):
@@ -92,22 +95,23 @@ class GameModelAPI(APIView):
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
     
     def post(self, request,*args, **kwargs):
-
+        #print('here')
         try:
             serializer = GamesSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
                 temp=GameModel.objects.get(id=serializer.data['id'])
 
-        except:
-            
+        except Exception as e:
+            print(e)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         thisRecord=SectionThrough(
-            section=SectionModel.objects.get(name='Texas Holdem'),
+            #section=SectionModel.objects.get(name='Texas Holdem'),
             game=GameModel.objects.get(id=serializer.data['id']),
             description=request.data['description']
         )
+
         thisRecord.save()
         try:
             thisDirector = UserModel.objects.get(id=request.data['director'])
@@ -349,7 +353,12 @@ def InfoForLocations(request, *args, **kwargs):
                     'played_game_id':one_section.GetNextPlayedGameID()
                 })
             return_values[one_game.week_day].append(this_dictionary)
-    except:
-        return JsonResponse({'data':[]})
-
-    return JsonResponse({'data':return_values})
+    except Exception as e:
+        print(e)
+        return JsonResponse({
+            'data':[],
+            'status':'Problem'})
+    
+    return JsonResponse({
+        'data':return_values,
+        'status':'No Problem'})

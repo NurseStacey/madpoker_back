@@ -11,7 +11,7 @@ class PlayersAPI(APIView):
 
     def get(self, request, *args, **kwargs):
 
-        Games = PlayerModel.objects.all()
+        Games = PlayerModel.objects.exclude(player='this is not a player')
         serializer = PlayersSerializer(Games, many=True)
         return Response(serializer.data)
     

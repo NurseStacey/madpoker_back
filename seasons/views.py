@@ -60,4 +60,14 @@ class SeasonModelAPI(APIView):
 
         return Response({}, status=status.HTTP_200_OK)   
     
+    def delete(self, request,id,*args, **kwargs):
+        
+        try:
+            thisRecord = SeasonModel.objects.get(id=id)
+            thisRecord.delete()
+        except Exception as e:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({}, status=status.HTTP_200_OK)    
+    
     

@@ -4,10 +4,18 @@ from venues.models import VenueModel
 from datetime import date,timedelta,datetime
 from django.utils import timezone
 from seasons.models import SeasonTypeModel
+from .utils import *
 
 class SectionModel(models.Model):
     name=models.CharField(max_length=20, default='Texas Holdem', unique=True)
 
+    @classmethod
+    def get_default_pk(cls):
+        section,created = cls.objects.get_or_create(
+            name='Texas Holdem', 
+        )
+        return section.pk
+    
 class GameModel(models.Model):
     week_day = models.CharField(max_length=10)
     time=models.CharField(max_length=10)
@@ -47,7 +55,7 @@ class GameModel(models.Model):
         return oneGame.pk    
 
 class SectionThrough(models.Model):
-    section=models.ForeignKey(SectionModel, on_delete=models.PROTECT)
+    section=models.ForeignKey(SectionModel, on_delete=models.PROTECT, default=SectionModel.get_default_pk)
     game=models.ForeignKey(GameModel, on_delete=models.PROTECT)
     director=models.ForeignKey(UserModel, null=True, on_delete=models.SET_NULL)
     active=models.BooleanField(default=True)  
