@@ -9,7 +9,34 @@ from players.serializers import PlayersSerializer
 from django.db.models import ProtectedError
 from django.http import JsonResponse
 
+class GetAllGamesInforGameView(APIView):
+    def get(self, request, *args, **kwargs):
 
+        return_value={
+            'game_dictionaries':[],
+            'all_dates':[],
+            'all_seasons':[],
+            'sections':[],
+            'venues':[]
+        }
+        try:
+            for one_played_game in PlayedGameModel.objects.filter(finalized=True):
+                return_value['game_dictionaries'].append(one_played_game.get_dictionary_for_results_view())
+
+            if return_value['game_dictionaries']==[]:
+                return Response({'status':'no finalized games'}, status=status.HTTP_200_OK)
+
+            return_value['venues']=list(set([x.venue for x in return_value['game_dictionaries']])).sort()
+
+            return_value['all_dates']=list(set([x.date for x in return_value['game_dictionaries']])).sort().reversed()
+            return_value['all_seasons']=list(set([x.season for x in return_value['game_dictionaries']])).sort()
+            return_value['sections']=list(set([x.section for x in return_value['game_dictionaries']])).sort()
+
+            return Response(return_value, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+
+            return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)
 
 class PlayedGamesEvents(APIView):
     def get(self, request,  id, *args, **kwargs):

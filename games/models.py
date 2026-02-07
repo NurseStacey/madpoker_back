@@ -3,7 +3,7 @@ from login_api.models import UserModel
 from venues.models import VenueModel
 from datetime import date,timedelta,datetime
 from django.utils import timezone
-from seasons.models import SeasonTypeModel
+from seasons.models import SeasonTypeModel,SeasonModel
 from .utils import *
 
 class SectionModel(models.Model):
@@ -108,6 +108,29 @@ class PlayedGameModel(models.Model):
                                   related_name='played_games')
     date= models.DateField(default=timezone.now)
     finalized=models.BooleanField(default=False)
+
+    def get_dictionary_for_results_view(self):
+
+        try:
+            return({
+                'venue':self.which_game.game.venue.venue_name,
+                'date':self.date.strftime('%m-%d-%Y'),
+                'season':self.get_season(),
+                'section':self.which_game.section.name,
+                'id':self.id
+            })
+        except Exception as e:
+            print(e)
+            return({})
+    
+    def get_season(self):
+        this_season_type=self.which_game.game.season_type
+        this_season=SeasonModel.objects.filter(
+            season_type=this_season_type).filter(
+                start_date__gte=self.date).get(
+                    end_date__lt=self.date
+                )
+        return this_season.season
 
     def get_other_events(self):
 

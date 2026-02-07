@@ -17,13 +17,17 @@ class GamesSerializer(serializers.ModelSerializer):
 class PlayedGamesSerializer(serializers.ModelSerializer):
 
     PlayersArray = serializers.SerializerMethodField()
+    OtherEvents = serializers.SerializerMethodField()
     
     class Meta:
         model = PlayedGameModel
-        fields =['PlayersArray' ]               
+        fields =['PlayersArray','OtherEvents' ]               
 
     def get_PlayersArray(self, obj):
         return obj.get_players()
+    
+    def get_OtherEvents(self,obj):
+        return obj.get_other_events()
     
 class SectionSerializer(serializers.ModelSerializer):
 

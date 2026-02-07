@@ -12,5 +12,7 @@ urlpatterns = [
     path('one_section/<int:id>/',SectionsAPI.as_view(), name='one_event'),
     path('sectionthrough/',SectionsThroughAPI.as_view(), name='section_through'),
     path('one_sectionthrough/<int:id>/',SectionsThroughAPI.as_view(), name='one_section_through'),
-    path('info_for_locations_page/',InfoForLocations, name='info_for_locations_page')
+    path('info_for_locations_page/',InfoForLocations, name='info_for_locations_page'),
+    path('get_all_infor_for_game_view/',GetAllGamesInforGameView.as_view(), name='get_all_infor_for_game_view'),
+    
 ]
