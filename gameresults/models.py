@@ -14,3 +14,8 @@ class GameResultModel(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['game', 'player'], name='unique_registration')
         ]
+
+    def this_result(self):
+        game_info = self.game.get_dictionary_for_results_view()
+
+        return '{} - {} - {} - {}'.format(game_info['venue'],game_info['date'], self.position, self.points)

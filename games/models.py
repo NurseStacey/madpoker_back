@@ -135,7 +135,7 @@ class PlayedGameModel(models.Model):
     finalized=models.BooleanField(default=False)
 
     def get_dictionary_for_results_view(self):
-
+        pass
         try:
             return({
                 'venue':self.which_game.game.venue.venue_name,
@@ -152,8 +152,8 @@ class PlayedGameModel(models.Model):
         this_season_type=self.which_game.game.season_type
         this_season=SeasonModel.objects.filter(
             season_type=this_season_type).filter(
-                start_date__gte=self.date).get(
-                    end_date__lt=self.date
+                start_date__lte=self.date).get(
+                    end_date__gte=self.date
                 )
         return this_season.season
 

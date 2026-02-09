@@ -11,17 +11,36 @@ from players.models import PlayerModel
 from django.db.models import ProtectedError
 from django.http import JsonResponse
 
-class GetTheseGameDates(APIView):
+class GetThisPlayerResults(APIView):
     def post(self, request, *args, **kwargs):
+
+        if request.data['playerID']==-1:
+            return Response({}, status=status.HTTP_100_CONTINUE)
+        
         print(request.data)
         try:
             allGames=PlayedGameModel.objects.filter(finalized=True)
-            if request.data['playerID']!=-1:
-                allGames=allGames.filter(id__in=[
-                    x.game.id for x in GameResultModel.objects.filter(player=request.data['playerID'])
-                ])                
+              
 
-            return Response({}, status=status.HTTP_200_OK)
+            if request.data['venueID']!=-1:
+                thisVenue=VenueModel.objects.get(id=request.data['venueID'])
+                allGames=allGames.filter(which_game__in=
+                                         SectionModel.objects.filter(game__in=
+                                                                     GameModel.objects.filter(venue=thisVenue)))
+
+            if request.data['seasonID']!=-1:
+                this_season=SeasonModel.objects.get(id=request.data['seasonID'])
+                start_date=this_season.start_date
+                end_date=this_season.end_date
+                allGames=allGames.filter(date__gte=start_date).filter(date__le=end_date)
+
+            return_values=[]
+            thisPlayer=PlayerModel.objects.get(id=request.data['playerID'])
+            for oneGame in GameResultModel.objects.filter(game__in=allGames).filter(player=thisPlayer):
+                return_values.append(oneGame.this_result())
+
+            return Response({'data':return_values}, status=status.HTTP_200_OK)
+        
         except Exception as e:
             print(e)
 
