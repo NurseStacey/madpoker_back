@@ -22,6 +22,7 @@ class GameRostersAPI(APIView):
 #used to get roster for  director
     def get(self, request, id, *args, **kwargs):
 
+
         try:
             thisGame = PlayedGameModel.objects.get(id=id)
             serializer = GameResultsSerializer(GameResultModel.objects.filter(game=thisGame), many=True)
@@ -32,26 +33,90 @@ class GameRostersAPI(APIView):
             print(e)
             return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)
 
-
-class UpdateRosterAPI(APIView):
+class UpdateRosterOnlyPositionAPI(APIView):
 
     def post(self, request, *args, **kwargs):
 
+        def calculate_points(position):
+            if position<10:
+                return 2*(number_of_players-position+1)
+            else:
+                return number_of_players-position+1            
+            
         problemPlayers=[]
+        number_of_players = len(request.data['allUsers'])
+        which_game=-1
         for onePlayer in request.data['allUsers']:           
             try:
 
                 thisRecord= GameResultModel.objects.get(id=onePlayer['id'])
                 if str(onePlayer['position']).isdigit():
-                    thisRecord.position=onePlayer['position']
-                else:
-                    thisRecord.position=-1
-                thisRecord.save()
+                    which_game=thisRecord.game.id
+                    thisPosition=int(onePlayer['position'])
+
+                    if thisPosition>0 and not thisPosition==thisRecord.position:
+                        thisRecord.position=thisPosition
+                        thisRecord.points=calculate_points(thisPosition)
+                        thisRecord.save()            
             except:
                 problemPlayers.append(onePlayer['name'])
 
-        if problemPlayers==[]:
-            return Response({'result':'OK'}, status=status.HTTP_200_OK)  
+        if problemPlayers==[] and not which_game==-1:
+            thisGame = PlayedGameModel.objects.get(id=which_game)
+            serializer = GameResultsSerializer(GameResultModel.objects.filter(game=thisGame), many=True)            
+            return Response(serializer.data, status=status.HTTP_200_OK)  
+        else: 
+            return Response({
+                'result':'problem',
+                'problem_players':problemPlayers
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+class UpdateRosterAPI(APIView):
+
+    def post(self, request, *args, **kwargs):
+
+        def calculate_points(position):
+            if position<10:
+                return 2*(number_of_players-position+1)
+            else:
+                return number_of_players-position+1            
+            
+        problemPlayers=[]
+        number_of_players = len(request.data['allUsers'])
+        which_game=-1
+        for onePlayer in request.data['allUsers']:           
+            try:
+
+                thisRecord= GameResultModel.objects.get(id=onePlayer['id'])
+                if str(onePlayer['position']).isdigit():
+                    which_game=thisRecord.game.id
+                    thisPosition=int(onePlayer['position'])
+
+                    if thisPosition>0 and not thisPosition==thisRecord.position:
+                        thisRecord.position=thisPosition
+                        thisPoints=0
+                        if str(onePlayer['points']).isdigit():
+                            thisPoints = int(onePlayer['points'])
+                            if thisPoints<1:
+                                thisPoints=calculate_points(thisPosition)
+                        else:
+                            thisPoints=calculate_points(thisPosition)
+                            
+                        thisRecord.points=thisPoints
+                        thisRecord.save()
+                elif str(onePlayer['points']).isdigit():
+                    thisPoints = int(onePlayer['points'])
+                    if thisPoints>0 and not thisPoints==thisRecord.points:
+                        thisRecord.points=thisPoints
+                        thisRecord.save()
+                
+            except:
+                problemPlayers.append(onePlayer['name'])
+
+        if problemPlayers==[] and not which_game==-1:
+            thisGame = PlayedGameModel.objects.get(id=which_game)
+            serializer = GameResultsSerializer(GameResultModel.objects.filter(game=thisGame), many=True)            
+            return Response(serializer.data, status=status.HTTP_200_OK)  
         else: 
             return Response({
                 'result':'problem',

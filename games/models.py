@@ -16,6 +16,9 @@ class SectionModel(models.Model):
         )
         return section.pk
     
+    def __repr__(self):
+        return self.name
+    
 class GameModel(models.Model):
     week_day = models.CharField(max_length=10)
     time=models.CharField(max_length=10)
@@ -26,7 +29,16 @@ class GameModel(models.Model):
     description=models.CharField(max_length=250, null=True, blank=True)
     season_type=models.ForeignKey(SeasonTypeModel,  on_delete=models.SET_DEFAULT,default=SeasonTypeModel.get_default_pk )
 
-
+    def __repr__(self):
+        return self.venue.venue_name + "-" + self.week_day
+    
+    def dictionary_for_location_page(self):
+        return{
+                'venue_name':self.venue.venue_name,                
+                'sections':[],
+                'time':self.time,
+            }
+    
     def get_dates(self):
         datelist = [{'date':x.date,'id':x.id} for x in self.game_details.all()]
         datelist.sort(key=lambda x: x['date'], reverse=True)
@@ -75,7 +87,7 @@ class SectionThrough(models.Model):
             print(e)
 
     
-    def GetNextPlayedGameID(self):
+    def GetNextPlayedGameInfo(self):
         Today=date.today()
 
         next_game=None
@@ -83,6 +95,13 @@ class SectionThrough(models.Model):
             next_game=self.played_games.all().latest('date')
         except:
             pass
+
+        if next_game.finalized:
+            next_game = PlayedGameModel(
+                which_game=self,
+                date = (next_game.date+timedelta(days=offset))
+            )
+            next_game.save()
 
         if next_game==None or (next_game.date-Today).days<0:
   
@@ -98,7 +117,13 @@ class SectionThrough(models.Model):
             )
             next_game.save()
         
-        return next_game.id            
+        return {
+            'description':self.description,
+            'id':self.id,
+            'event':self.section.name,            
+            'played_game_id':next_game.id,
+            'date':next_game.date.strftime('%m-%d')
+        }        
 
 
 class PlayedGameModel(models.Model):

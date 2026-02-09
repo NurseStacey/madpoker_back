@@ -367,18 +367,16 @@ def InfoForLocations(request, *args, **kwargs):
 
     try:
         for one_game in GameModel.objects.filter(active=True).order_by('time'):
-            this_dictionary={
-                'venue_name':one_game.venue.venue_name,                
-                'sections':[],
-                'time':one_game.time,
-            }
+            this_dictionary=one_game.dictionary_for_location_page()
+
             for one_section in SectionThrough.objects.filter(active=True).filter(game=one_game):
-                this_dictionary['sections'].append({
-                    'description':one_section.description,
-                    'id':one_section.id,
-                    'event':one_section.section.name,
-                    'played_game_id':one_section.GetNextPlayedGameID()
-                })
+                this_dictionary['sections'].append(one_section.GetNextPlayedGameInfo())
+                # this_dictionary['sections'].append({
+                #     'description':one_section.description,
+                #     'id':one_section.id,
+                #     'event':one_section.section.name,
+                #     'played_game_id':one_section.GetNextPlayedGameID()
+                # })
             return_values[one_game.week_day].append(this_dictionary)
     except Exception as e:
         print(e)
