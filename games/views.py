@@ -6,9 +6,27 @@ from login_api.models import UserModel
 from .serializers import *
 from rest_framework import status
 from players.serializers import PlayersSerializer
+from gameresults.models import GameResultModel
+from players.models import PlayerModel
 from django.db.models import ProtectedError
 from django.http import JsonResponse
 
+class GetTheseGameDates(APIView):
+    def post(self, request, *args, **kwargs):
+        print(request.data)
+        try:
+            allGames=PlayedGameModel.objects.filter(finalized=True)
+            if request.data['playerID']!=-1:
+                allGames=allGames.filter(id__in=[
+                    x.game.id for x in GameResultModel.objects.filter(player=request.data['playerID'])
+                ])                
+
+            return Response({}, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+
+            return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)
+        
 class GetAllGamesInforGameView(APIView):
     def get(self, request, *args, **kwargs):
 
