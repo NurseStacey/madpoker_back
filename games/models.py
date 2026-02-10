@@ -133,7 +133,10 @@ class PlayedGameModel(models.Model):
                                   related_name='played_games')
     date= models.DateField(default=timezone.now)
     finalized=models.BooleanField(default=False)
-
+    
+    def get_venue_name(self):
+        return self.which_game.game.venue.venue_name
+    
     def get_dictionary_for_results_view(self):
         pass
         try:

@@ -12,9 +12,9 @@ from django.db.models import ProtectedError
 from django.http import JsonResponse
 
 class GetThisPlayerResults(APIView):
-    def post(self, request, *args, **kwargs):
+    def get(self, request, id, *args, **kwargs):
 
-        if request.data['playerID']==-1:
+        if id==-1:
             return Response({}, status=status.HTTP_100_CONTINUE)
         
         print(request.data)
@@ -22,31 +22,43 @@ class GetThisPlayerResults(APIView):
             allGames=PlayedGameModel.objects.filter(finalized=True)
               
 
-            if request.data['venueID']!=-1:
-                thisVenue=VenueModel.objects.get(id=request.data['venueID'])
-                allGames=allGames.filter(which_game__in=
-                                         SectionModel.objects.filter(game__in=
-                                                                     GameModel.objects.filter(venue=thisVenue)))
+            # if request.data['venueID']!=-1:
+            #     thisVenue=VenueModel.objects.get(id=request.data['venueID'])
+            #     allGames=allGames.filter(which_game__in=
+            #                              SectionModel.objects.filter(game__in=
+            #                                                          GameModel.objects.filter(venue=thisVenue)))
 
-            if request.data['seasonID']!=-1:
-                this_season=SeasonModel.objects.get(id=request.data['seasonID'])
-                start_date=this_season.start_date
-                end_date=this_season.end_date
-                allGames=allGames.filter(date__gte=start_date).filter(date__le=end_date)
+            # if request.data['seasonID']!=-1:
+            #     this_season=SeasonModel.objects.get(id=request.data['seasonID'])
+            #     start_date=this_season.start_date
+            #     end_date=this_season.end_date
+            #     allGames=allGames.filter(date__gte=start_date).filter(date__le=end_date)
 
             return_values=[]
-            thisPlayer=PlayerModel.objects.get(id=request.data['playerID'])
+            the_seasons=[]
+            the_venues=[]
+            thisPlayer=PlayerModel.objects.get(id=id)
             for oneGame in GameResultModel.objects.filter(game__in=allGames).filter(player=thisPlayer):
-                return_values.append(oneGame.this_result())
+                return_values.append({
+                    'result_test':oneGame.this_result(),
+                    'venue':oneGame.game.get_venue_name(),
+                    'season':oneGame.game.get_season()
+                    })
+                the_seasons.append(oneGame.game.get_season())
+                the_venues.append(oneGame.game.get_venue_name())
 
-            return Response({'data':return_values}, status=status.HTTP_200_OK)
+            return Response({
+                'all_results':return_values,
+                'the_venues':set(the_venues),
+                'the_seasons':set(the_seasons)
+                }, status=status.HTTP_200_OK)
         
         except Exception as e:
             print(e)
 
             return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)
         
-class GetAllGamesInforGameView(APIView):
+class GetAllGamesInfoGameView(APIView):
     def get(self, request, *args, **kwargs):
 
         return_value={
