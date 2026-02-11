@@ -29,55 +29,55 @@ class PlayedGamesSerializer(serializers.ModelSerializer):
     def get_OtherEvents(self,obj):
         return obj.get_other_events()
     
-class SectionSerializer(serializers.ModelSerializer):
+# class SectionSerializer(serializers.ModelSerializer):
 
-    class Meta:
-        model=SectionModel
-        fields='__all__'
+#     class Meta:
+#         model=SectionModel
+#         fields='__all__'
 
-class SectionThroughSerializerSimple(serializers.ModelSerializer):
+# class SectionThroughSerializerSimple(serializers.ModelSerializer):
 
-    class Meta:
-        model=SectionThrough
-        fields='__all__'
+#     class Meta:
+#         model=SectionThrough
+#         fields='__all__'
 
-class SectionThroughSerializer(serializers.ModelSerializer):
-    section_name = serializers.CharField(source='section.name', read_only=True)
-    director_name = serializers.CharField(default='', source='director.username', read_only=True)
-    venue_name = serializers.CharField(default='', source='game.venue.venue_name', read_only=True)
-    week_day = serializers.CharField(default='', source='game.week_day', read_only=True)
-    time = serializers.CharField(default='', source='game.time      ', read_only=True)
-    game_text=serializers.SerializerMethodField()
-    all_dates=serializers.SerializerMethodField()
+# class SectionThroughSerializer(serializers.ModelSerializer):
+#     section_name = serializers.CharField(source='section.name', read_only=True)
+#     director_name = serializers.CharField(default='', source='director.username', read_only=True)
+#     venue_name = serializers.CharField(default='', source='game.venue.venue_name', read_only=True)
+#     week_day = serializers.CharField(default='', source='game.week_day', read_only=True)
+#     time = serializers.CharField(default='', source='game.time      ', read_only=True)
+#     game_text=serializers.SerializerMethodField()
+#     all_dates=serializers.SerializerMethodField()
 
-    class Meta:
-        model = SectionThrough
-        fields = ['game_text','time','section_name','week_day', 'director_name', 'active','id','venue_name', 'all_dates']        
+#     class Meta:
+#         model = SectionThrough
+#         fields = ['game_text','time','section_name','week_day', 'director_name', 'active','id','venue_name', 'all_dates']        
 
-    def get_all_dates(self, obj):
-        return list({
-            'id':y.id,
-            'date':y.date.strftime('%m-%d-%Y'),
-            'canUpdate':not (y.finalized)
-            } for y in obj.played_games.all())
+#     def get_all_dates(self, obj):
+#         return list({
+#             'id':y.id,
+#             'date':y.date.strftime('%m-%d-%Y'),
+#             'canUpdate':not (y.finalized)
+#             } for y in obj.played_games.all())
     
-    def get_game_text(self, obj):
-        venue_name = obj.game.venue.venue_name
-        week_day=obj.game.week_day
-        time=obj.game.time
-        event=obj.section.name
+#     def get_game_text(self, obj):
+#         venue_name = obj.game.venue.venue_name
+#         week_day=obj.game.week_day
+#         time=obj.game.time
+#         event=obj.section.name
 
-        return venue_name + ' - ' + time + ' - ' + week_day + ' - ' + event
+#         return venue_name + ' - ' + time + ' - ' + week_day + ' - ' + event
     
-    def get_director_name(self, obj):
-        try:
-            return obj.director.username
-        except:
-            return ''
+#     def get_director_name(self, obj):
+#         try:
+#             return obj.director.username
+#         except:
+#             return ''
 
-class SectionThroughForLocations(serializers.ModelSerializer):
-    venue = serializers.CharField(source='game.venue.venue_name', read_only=True)
+# class SectionThroughForLocations(serializers.ModelSerializer):
+#     venue = serializers.CharField(source='game.venue.venue_name', read_only=True)
     
-    class Meta:
-        model = SectionThrough
-        fields='__all__'
+#     class Meta:
+#         model = SectionThrough
+#         fields='__all__'

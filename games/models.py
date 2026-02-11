@@ -6,24 +6,24 @@ from django.utils import timezone
 from seasons.models import SeasonTypeModel,SeasonModel
 from .utils import *
 
-class SectionModel(models.Model):
-    name=models.CharField(max_length=20, default='Texas Holdem', unique=True)
+# class SectionModel(models.Model):
+#     name=models.CharField(max_length=20, default='Texas Holdem', unique=True)
 
-    @classmethod
-    def get_default_pk(cls):
-        section,created = cls.objects.get_or_create(
-            name='Texas Holdem', 
-        )
-        return section.pk
+#     @classmethod
+#     def get_default_pk(cls):
+#         section,created = cls.objects.get_or_create(
+#             name='Texas Holdem', 
+#         )
+#         return section.pk
     
-    def __repr__(self):
-        return self.name
+#     def __repr__(self):
+#         return self.name
     
 class GameModel(models.Model):
     week_day = models.CharField(max_length=10)
     time=models.CharField(max_length=10)
     venue=models.ForeignKey(VenueModel, null=True, on_delete=models.PROTECT)
-    all_sections=models.ManyToManyField(SectionModel,through='SectionThrough', related_name='game_sections')
+    #all_sections=models.ManyToManyField(SectionModel,through='SectionThrough', related_name='game_sections')
     active=models.BooleanField(default=True)  
     director=models.ForeignKey(UserModel, on_delete=models.SET_NULL, null=True)
     description=models.CharField(max_length=250, null=True, blank=True)
@@ -35,7 +35,7 @@ class GameModel(models.Model):
     def dictionary_for_location_page(self):
         return{
                 'venue_name':self.venue.venue_name,                
-                'sections':[],
+                #'sections':[],
                 'time':self.time,
             }
     
@@ -66,68 +66,68 @@ class GameModel(models.Model):
         )
         return oneGame.pk    
 
-class SectionThrough(models.Model):
-    section=models.ForeignKey(SectionModel, on_delete=models.PROTECT, default=SectionModel.get_default_pk)
-    game=models.ForeignKey(GameModel, on_delete=models.PROTECT)
-    director=models.ForeignKey(UserModel, null=True, on_delete=models.SET_NULL)
-    active=models.BooleanField(default=True)  
-    description=models.CharField(max_length=250, null=True, blank=True)
+# class SectionThrough(models.Model):
+#     section=models.ForeignKey(SectionModel, on_delete=models.PROTECT, default=SectionModel.get_default_pk)
+#     game=models.ForeignKey(GameModel, on_delete=models.PROTECT)
+#     director=models.ForeignKey(UserModel, null=True, on_delete=models.SET_NULL)
+#     active=models.BooleanField(default=True)  
+#     description=models.CharField(max_length=250, null=True, blank=True)
 
-    def need_to_protect(self):
+#     def need_to_protect(self):
 
-        try:
-            if len(PlayedGameModel.objects.filter(which_game=self))==0:
-                return False
-            for onePlayedGame in PlayedGameModel.objects.filter(which_game=self):
-                if onePlayedGame.date<date.today() and len(onePlayedGame.player_results.all()):
-                    return True
+#         try:
+#             if len(PlayedGameModel.objects.filter(which_game=self))==0:
+#                 return False
+#             for onePlayedGame in PlayedGameModel.objects.filter(which_game=self):
+#                 if onePlayedGame.date<date.today() and len(onePlayedGame.player_results.all()):
+#                     return True
             
-            return False
-        except Exception as e:
-            print(e)
+#             return False
+#         except Exception as e:
+#             print(e)
 
     
-    def GetNextPlayedGameInfo(self):
-        Today=date.today()
+#     def GetNextPlayedGameInfo(self):
+#         Today=date.today()
 
-        next_game=None
-        try:
-            next_game=self.played_games.all().latest('date')
-        except:
-            pass
+#         next_game=None
+#         try:
+#             next_game=self.played_games.all().latest('date')
+#         except:
+#             pass
 
-        # if next_game.finalized:
-        #     next_game = PlayedGameModel(
-        #         which_game=self,
-        #         date = (next_game.date+timedelta(days=offset))
-        #     )
-        #     next_game.save()
+#         # if next_game.finalized:
+#         #     next_game = PlayedGameModel(
+#         #         which_game=self,
+#         #         date = (next_game.date+timedelta(days=offset))
+#         #     )
+#         #     next_game.save()
 
-        if next_game==None or next_game.finalized or (next_game.date-Today).days<0:
+#         if next_game==None or next_game.finalized or (next_game.date-Today).days<0:
   
-            today_weekday = (Today.weekday()+1 % 7) #0 is Monday here.  0 is Sunday in model
+#             today_weekday = (Today.weekday()+1 % 7) #0 is Monday here.  0 is Sunday in model
 
-            offset=WeekDayNumbers[self.game.week_day]-today_weekday
-            if offset<0:
-                offset+=7
+#             offset=WeekDayNumbers[self.game.week_day]-today_weekday
+#             if offset<0:
+#                 offset+=7
 
-            next_game = PlayedGameModel(
-                which_game=self,
-                date = (date(Today.year, Today.month, Today.day)+timedelta(days=offset))
-            )
-            next_game.save()
+#             next_game = PlayedGameModel(
+#                 which_game=self,
+#                 date = (date(Today.year, Today.month, Today.day)+timedelta(days=offset))
+#             )
+#             next_game.save()
         
-        return {
-            'description':self.description,
-            'id':self.id,
-            'event':self.section.name,            
-            'played_game_id':next_game.id,
-            'date':next_game.date.strftime('%m-%d')
-        }        
+#         return {
+#             'description':self.description,
+#             'id':self.id,
+#             'event':self.section.name,            
+#             'played_game_id':next_game.id,
+#             'date':next_game.date.strftime('%m-%d')
+#         }        
 
 
 class PlayedGameModel(models.Model):
-    which_game= models.ForeignKey(SectionThrough, 
+    which_game= models.ForeignKey(GameModel, 
                                   on_delete=models.PROTECT, 
                                   null=True, 
                                   related_name='played_games')

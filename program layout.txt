@@ -1,0 +1,13 @@
+Apps
+    Games
+    Venues
+    Players
+    Directors
+    GameResults
+    Seasons
+    WebsiteData
+
+Games Models
+    GameVenueModel - contains all the general info for the game
+    PlayedGameModel - specific info for each date
+
