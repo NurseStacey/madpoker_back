@@ -75,11 +75,11 @@ class GetAllGamesInfoGameView(APIView):
             if return_value['game_dictionaries']==[]:
                 return Response({'status':'no finalized games'}, status=status.HTTP_200_OK)
 
-            return_value['venues']=list(set([x.venue for x in return_value['game_dictionaries']])).sort()
+            return_value['venues']=list(set([x['venue'] for x in return_value['game_dictionaries']])).sort()
 
-            return_value['all_dates']=list(set([x.date for x in return_value['game_dictionaries']])).sort().reversed()
-            return_value['all_seasons']=list(set([x.season for x in return_value['game_dictionaries']])).sort()
-            return_value['sections']=list(set([x.section for x in return_value['game_dictionaries']])).sort()
+            return_value['all_dates']=list(set([x['date'] for x in return_value['game_dictionaries']])).sort().reversed()
+            return_value['all_seasons']=list(set([x['season'] for x in return_value['game_dictionaries']])).sort()
+            return_value['sections']=list(set([x['section'] for x in return_value['game_dictionaries']])).sort()
 
             return Response(return_value, status=status.HTTP_200_OK)
         except Exception as e:
@@ -416,6 +416,9 @@ def InfoForLocations(request, *args, **kwargs):
 
     try:
         for one_game in GameModel.objects.filter(active=True).order_by('time'):
+            if (one_game.id==7):
+                pass
+
             this_dictionary=one_game.dictionary_for_location_page()
 
             for one_section in SectionThrough.objects.filter(active=True).filter(game=one_game):

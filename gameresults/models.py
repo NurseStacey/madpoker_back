@@ -18,4 +18,4 @@ class GameResultModel(models.Model):
     def this_result(self):
         game_info = self.game.get_dictionary_for_results_view()
 
-        return '{} - {} - {} - {}'.format(game_info['venue'],game_info['date'], self.position, self.points)
+        return '{} - {} - Position:{} - Points:{}'.format(game_info['venue'],game_info['date'], self.position, self.points)

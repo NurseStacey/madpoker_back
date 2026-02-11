@@ -96,14 +96,14 @@ class SectionThrough(models.Model):
         except:
             pass
 
-        if next_game.finalized:
-            next_game = PlayedGameModel(
-                which_game=self,
-                date = (next_game.date+timedelta(days=offset))
-            )
-            next_game.save()
+        # if next_game.finalized:
+        #     next_game = PlayedGameModel(
+        #         which_game=self,
+        #         date = (next_game.date+timedelta(days=offset))
+        #     )
+        #     next_game.save()
 
-        if next_game==None or (next_game.date-Today).days<0:
+        if next_game==None or next_game.finalized or (next_game.date-Today).days<0:
   
             today_weekday = (Today.weekday()+1 % 7) #0 is Monday here.  0 is Sunday in model
 
@@ -142,7 +142,7 @@ class PlayedGameModel(models.Model):
         try:
             return({
                 'venue':self.which_game.game.venue.venue_name,
-                'date':self.date.strftime('%m-%d-%Y'),
+                'date':self.date,
                 'season':self.get_season(),
                 'section':self.which_game.section.name,
                 'id':self.id
