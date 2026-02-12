@@ -156,6 +156,43 @@ class OneGameModelAPI(APIView):
         
         return Response({}, status=status.HTTP_200_OK)   
 
+
+def InfoForLocations(request, *args, **kwargs):
+
+    return_values = {
+        "Sunday":[],
+        "Monday":[],
+        "Tuesday":[],
+        "Wednesday":[],
+        "Thursday":[],
+        "Friday":[],
+        "Saturday":[],
+    }
+
+    try:
+        for one_game in GameModel.objects.filter(active=True).order_by('time'):
+
+            this_dictionary=one_game.GetNextPlayedGameInfo()
+            return_values[one_game.week_day].append(this_dictionary)
+            # for one_section in SectionThrough.objects.filter(active=True).filter(game=one_game):
+            #     this_dictionary['sections'].append(one_section.GetNextPlayedGameInfo())
+            #     # this_dictionary['sections'].append({
+            #     #     'description':one_section.description,
+            #     #     'id':one_section.id,
+            #     #     'event':one_section.section.name,
+            #     #     'played_game_id':one_section.GetNextPlayedGameID()
+            #     # })
+            # return_values[one_game.week_day].append(this_dictionary)
+    except Exception as e:
+        print(e)
+        return JsonResponse({
+            'data':[],
+            'status':'Problem'})
+    
+    return JsonResponse({
+        'data':return_values,
+        'status':'No Problem'})
+
 # class GetThisPlayerResults(APIView):
 #     def get(self, request, id, *args, **kwargs):
 
@@ -507,40 +544,3 @@ class OneGameModelAPI(APIView):
         
 #         return Response({}, status=status.HTTP_200_OK)      
         
-# def InfoForLocations(request, *args, **kwargs):
-
-#     return_values = {
-#         "Sunday":[],
-#         "Monday":[],
-#         "Tuesday":[],
-#         "Wednesday":[],
-#         "Thurseday":[],
-#         "Friday":[],
-#         "Saturday":[],
-#     }
-
-#     try:
-#         for one_game in GameModel.objects.filter(active=True).order_by('time'):
-#             if (one_game.id==7):
-#                 pass
-
-#             this_dictionary=one_game.dictionary_for_location_page()
-
-#             for one_section in SectionThrough.objects.filter(active=True).filter(game=one_game):
-#                 this_dictionary['sections'].append(one_section.GetNextPlayedGameInfo())
-#                 # this_dictionary['sections'].append({
-#                 #     'description':one_section.description,
-#                 #     'id':one_section.id,
-#                 #     'event':one_section.section.name,
-#                 #     'played_game_id':one_section.GetNextPlayedGameID()
-#                 # })
-#             return_values[one_game.week_day].append(this_dictionary)
-#     except Exception as e:
-#         print(e)
-#         return JsonResponse({
-#             'data':[],
-#             'status':'Problem'})
-    
-#     return JsonResponse({
-#         'data':return_values,
-#         'status':'No Problem'})

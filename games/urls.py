@@ -5,6 +5,7 @@ from .views import *
 urlpatterns = [
     path('basic_games/', GameModelAPI.as_view(), name='basic_games'),
     path('onegame/<int:id>/', OneGameModelAPI.as_view(), name='one-game'),
+    path('info_for_locations_page/',InfoForLocations, name='info_for_locations_page'),
     # path('games_by_director/<int:id>/',GamesByDirectorAPI.as_view(), name='games_by_director'),
     # 
     # path('played_games_events/<int:id>/', PlayedGamesEvents.as_view(), name='events-for-player'),

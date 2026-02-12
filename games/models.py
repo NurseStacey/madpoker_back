@@ -6,18 +6,18 @@ from django.utils import timezone
 from seasons.models import SeasonTypeModel,SeasonModel
 from .utils import *
 
-# class SectionModel(models.Model):
-#     name=models.CharField(max_length=20, default='Texas Holdem', unique=True)
+class GameTypeModel(models.Model):
+    name=models.CharField(max_length=20, default='Texas Holdem', unique=True)
 
-#     @classmethod
-#     def get_default_pk(cls):
-#         section,created = cls.objects.get_or_create(
-#             name='Texas Holdem', 
-#         )
-#         return section.pk
+    @classmethod
+    def get_default_pk(cls):
+        game_type,created = cls.objects.get_or_create(
+            name='Texas Holdem', 
+        )
+        return game_type.pk
     
-#     def __repr__(self):
-#         return self.name
+    def __repr__(self):
+        return self.name
     
 class GameModel(models.Model):
     week_day = models.CharField(max_length=10)
@@ -28,15 +28,53 @@ class GameModel(models.Model):
     director=models.ForeignKey(UserModel, on_delete=models.SET_NULL, null=True)
     description=models.CharField(max_length=250, null=True, blank=True)
     season_type=models.ForeignKey(SeasonTypeModel,  on_delete=models.SET_DEFAULT,default=SeasonTypeModel.get_default_pk )
-
+    game_type = models.ForeignKey(GameTypeModel,  on_delete=models.SET_DEFAULT, default=GameTypeModel.get_default_pk)
+    
     def __repr__(self):
         return self.venue.venue_name + "-" + self.week_day
+
+
+    def GetNextPlayedGameInfo(self):
+        Today=date.today()
+
+        next_game=None
+        try:
+            next_game=self.played_games.all().latest('date')
+        except:
+            pass
+
+        try:
+            if next_game==None or next_game.finalized or (next_game.date-Today).days<0:
+    
+                today_weekday = (Today.weekday()+1 % 7) #0 is Monday here.  0 is Sunday in model
+
+                offset=WeekDayNumbers[self.week_day]-today_weekday
+                if offset<0:
+                    offset+=7
+
+                next_game = PlayedGameModel(
+                    which_game=self,
+                    date = (date(Today.year, Today.month, Today.day)+timedelta(days=offset))
+                )
+                next_game.save()
+        except Exception as e:
+            print(e)
+        
+        return {
+            'description':self.description,
+            'id':self.id, 
+            'played_game_id':next_game.id,
+            'date':next_game.date.strftime('%m-%d'),
+            'venue_name':self.venue.venue_name
+        }            
     
     def dictionary_for_location_page(self):
         return{
-                'venue_name':self.venue.venue_name,                
+                'venue_name':self.venue.venue_name,   
+                'description':self.description,             
                 #'sections':[],
                 'time':self.time,
+                'date':1
             }
     
     def get_dates(self):
