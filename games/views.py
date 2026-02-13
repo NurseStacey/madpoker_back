@@ -99,6 +99,12 @@ class OneGameModelAPI(APIView):
             thisRecord.delete()
         except ProtectedError:
             pass
+            if PlayedGameModel.objects.filter(which_game=thisRecord).filter(finalized=True).count()>0:
+                return Response({}, status=status.HTTP_403_FORBIDDEN)
+            else:
+                PlayedGameModel.objects.filter(which_game=thisRecord).delete()
+                thisRecord.delete()
+
             # print('protected error')
             # for oneSection in SectionThrough.objects.filter(game=thisRecord):
             #     if oneSection.need_to_protect():
@@ -170,7 +176,7 @@ def InfoForLocations(request, *args, **kwargs):
     }
 
     try:
-        for one_game in GameModel.objects.filter(active=True).order_by('time'):
+        for one_game in GameModel.objects.filter(active=True).order_by('venue__venue_name','time'):
 
             this_dictionary=one_game.GetNextPlayedGameInfo()
             return_values[one_game.week_day].append(this_dictionary)
@@ -192,6 +198,72 @@ def InfoForLocations(request, *args, **kwargs):
     return JsonResponse({
         'data':return_values,
         'status':'No Problem'})
+
+class GameTypeView(APIView):
+    def get(self, request, *args, **kwargs):
+        try:
+            GameTypes = GameTypeModel.objects.all()
+            serializer = GamesTypesSerializer(GameTypes, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+
+    def post(self, request,*args, **kwargs):
+        try:
+            serializer = GamesTypesSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response({}, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+   
+    def delete(self, request,id,*args, **kwargs):
+
+        def override_protction():            
+            thesePlayedGames.delete()
+            theseGames.delete()
+            try:
+                thisRecord.delete()
+                return Response({}, status=status.HTTP_200_OK)
+            except:
+                return Response({}, status=status.HTTP_400_BAD_REQUEST)
+                    
+        try:
+            thisRecord = GameTypeModel.objects.get(id=id)
+            thisRecord.delete()
+
+        except ProtectedError:
+            theseGames=GameModel.objects.filter(venue=thisRecord)
+            thesePlayedGames = PlayedGameModel.objects.filter(which_game__in=theseGames).filter(date__lt=date.today())
+            if thesePlayedGames.count()==0:
+                thesePlayedGames = PlayedGameModel.objects.filter(which_game__in=theseGames)
+                override_protction()
+            else:
+                thesePlayedGames = PlayedGameModel.objects.filter(which_game__in=theseGames)
+                players = [x  for thisGame in thesePlayedGames for x in thisGame.player_results.all()]
+                if len(players)==0:
+                    override_protction()
+
+            return Response({}, status=status.HTTP_403_FORBIDDEN)
+        except Exception as e:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({}, status=status.HTTP_200_OK)
+    
+    def patch(self, request,id,*args, **kwargs):
+        try:
+            thisRecord = GameTypeModel.objects.get(id=id)
+            serializer = GamesTypesSerializer(thisRecord, data=request.data, partial=True)
+            
+            if serializer.is_valid():
+                serializer.save()
+        except:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({}, status=status.HTTP_200_OK)   
+    
 
 # class GetThisPlayerResults(APIView):
 #     def get(self, request, id, *args, **kwargs):
