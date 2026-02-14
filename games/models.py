@@ -35,6 +35,15 @@ class GameModel(models.Model):
     def __repr__(self):
         return self.venue.venue_name + "-" + self.week_day
 
+    def RosterDictionary(self):
+        return_value={
+            'venue':self.venue.venue_name,
+            'title':'{}-{}-{}'.format(self.venue.venue_name,self.game_type.name,self.week_day),
+            'director':self.director.username,
+            'dates':[x.get_date_with_ID() for x in self.played_games.all()]
+        }
+
+        return return_value
 
     def GetNextPlayedGameInfo(self):
         Today=date.today()
@@ -127,7 +136,7 @@ class GameModel(models.Model):
     @classmethod
     def get_default_pk(cls):
         oneGame, created = cls.objects.get_or_create(
-            Description='default game', 
+            description='default game', 
             defaults={
                 'WeekDay':'Monday',
                 'Time':'5:00'
@@ -135,6 +144,73 @@ class GameModel(models.Model):
         )
         return oneGame.pk    
 
+
+class PlayedGameModel(models.Model):
+    which_game= models.ForeignKey(GameModel, 
+                                  on_delete=models.PROTECT, 
+                                  null=True, 
+                                  related_name='played_games')
+    date= models.DateField(default=timezone.now)
+    finalized=models.BooleanField(default=False)
+    
+    def get_date_with_ID(self):
+        return {'date':self.date.strftime('%m-%d-%Y'),'id':self.id}
+    
+    def get_venue_name(self):
+        return self.which_game.game.venue.venue_name
+    
+    def get_dictionary_for_results_view(self):
+        pass
+        try:
+            return({
+                'venue':self.which_game.game.venue.venue_name,
+                'date':self.date,
+                'season':self.get_season(),
+                'section':self.which_game.section.name,
+                'id':self.id
+            })
+        except Exception as e:
+            print(e)
+            return({})
+    
+    def get_season(self):
+        this_season_type=self.which_game.game.season_type
+        this_season=SeasonModel.objects.filter(
+            season_type=this_season_type).filter(
+                start_date__lte=self.date).get(
+                    end_date__gte=self.date
+                )
+        return this_season.season
+
+    def get_other_events(self):
+
+        sections_this_date = PlayedGameModel.objects.filter(date=self.date)
+        the_game=self.which_game.game
+        these_sections = [x for x in sections_this_date if x.which_game.game==the_game and x.which_game.section!=self.which_game.section]
+        return_value=[{'event_name':x.which_game.section.name,'id':x.id } for x in these_sections]
+
+        return return_value
+    
+    def __repr__(self):
+        return self.date.strftime('%m-%d')
+    
+    def get_players(self):
+
+        return_value=[]
+        for onePlayer in self.player_results.all():
+            position_text=''
+            if onePlayer.position>0:
+                position_text=onePlayer.position
+
+            return_value.append({
+                'id':onePlayer.id,
+                'name':onePlayer.player.player,
+                'registration_time':timezone.localtime(onePlayer.registration_date_time).strftime('%m-%d  %H:%M'),
+                'position':position_text
+            })
+
+        return return_value
+    
 # class SectionThrough(models.Model):
 #     section=models.ForeignKey(SectionModel, on_delete=models.PROTECT, default=SectionModel.get_default_pk)
 #     game=models.ForeignKey(GameModel, on_delete=models.PROTECT)
@@ -194,66 +270,3 @@ class GameModel(models.Model):
 #             'date':next_game.date.strftime('%m-%d')
 #         }        
 
-
-class PlayedGameModel(models.Model):
-    which_game= models.ForeignKey(GameModel, 
-                                  on_delete=models.PROTECT, 
-                                  null=True, 
-                                  related_name='played_games')
-    date= models.DateField(default=timezone.now)
-    finalized=models.BooleanField(default=False)
-    
-    def get_venue_name(self):
-        return self.which_game.game.venue.venue_name
-    
-    def get_dictionary_for_results_view(self):
-        pass
-        try:
-            return({
-                'venue':self.which_game.game.venue.venue_name,
-                'date':self.date,
-                'season':self.get_season(),
-                'section':self.which_game.section.name,
-                'id':self.id
-            })
-        except Exception as e:
-            print(e)
-            return({})
-    
-    def get_season(self):
-        this_season_type=self.which_game.game.season_type
-        this_season=SeasonModel.objects.filter(
-            season_type=this_season_type).filter(
-                start_date__lte=self.date).get(
-                    end_date__gte=self.date
-                )
-        return this_season.season
-
-    def get_other_events(self):
-
-        sections_this_date = PlayedGameModel.objects.filter(date=self.date)
-        the_game=self.which_game.game
-        these_sections = [x for x in sections_this_date if x.which_game.game==the_game and x.which_game.section!=self.which_game.section]
-        return_value=[{'event_name':x.which_game.section.name,'id':x.id } for x in these_sections]
-
-        return return_value
-    
-    def __repr__(self):
-        return self.date.strftime('%m-%d')
-    
-    def get_players(self):
-
-        return_value=[]
-        for onePlayer in self.player_results.all():
-            position_text=''
-            if onePlayer.position>0:
-                position_text=onePlayer.position
-
-            return_value.append({
-                'id':onePlayer.id,
-                'name':onePlayer.player.player,
-                'registration_time':timezone.localtime(onePlayer.registration_date_time).strftime('%m-%d  %H:%M'),
-                'position':position_text
-            })
-
-        return return_value

@@ -8,6 +8,7 @@ urlpatterns = [
     path('info_for_locations_page/',InfoForLocations, name='info_for_locations_page'),
     path('get_game_types/',GameTypeView.as_view() , name='get_game_types'),
     path('one_game_type/<int:id>/',GameTypeView.as_view() , name='one_game_types'),
+    path('games_for_roster/',GamesForRostersView.as_view() , name='games_for_roster'),
     # path('games_by_director/<int:id>/',GamesByDirectorAPI.as_view(), name='games_by_director'),
     # 
     # path('played_games_events/<int:id>/', PlayedGamesEvents.as_view(), name='events-for-player'),

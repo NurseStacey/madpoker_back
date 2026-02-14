@@ -264,6 +264,21 @@ class GameTypeView(APIView):
         
         return Response({}, status=status.HTTP_200_OK)   
     
+class GamesForRostersView(APIView):
+    def get(self, request,*args, **kwargs):
+        all_game_data=[]
+
+        for oneGame in GameModel.objects.exclude(description='default game'):
+            all_game_data.append(oneGame.RosterDictionary())
+        
+        #all_venues = list(set([x['venue'] for x in all_game_data]))
+
+
+        return Response({
+            'all_game_data':all_game_data,
+            'directors':set([x['director'] for x in all_game_data]),
+            'venues':set([x['venue'] for x in all_game_data])
+        }, status=status.HTTP_200_OK)   
 
 # class GetThisPlayerResults(APIView):
 #     def get(self, request, id, *args, **kwargs):
