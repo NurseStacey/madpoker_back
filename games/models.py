@@ -5,6 +5,8 @@ from datetime import date,timedelta,datetime
 from django.utils import timezone
 from seasons.models import SeasonTypeModel,SeasonModel
 from .utils import *
+import re
+
 
 class GameTypeModel(models.Model):
     name=models.CharField(max_length=20, default='Texas Holdem', unique=True)
@@ -61,12 +63,41 @@ class GameModel(models.Model):
             print(e)
         
         return {
-            'description':self.description,
+            #'description':self.description,
+            'description':self.create_description_array(),
             'id':self.id, 
             'played_game_id':next_game.id,
             'date':next_game.date.strftime('%m-%d'),
-            'venue_name':self.venue.venue_name
+            'venue_name':self.venue.venue_name,
+            'game_type':self.game_type.name,
+            'time':self.time
         }            
+    
+    def create_description_array(self):
+        return_value=[]
+        description=self.description
+        if description[:2]!='@@':
+            description = '@@black@@' + description
+
+        if description[-2:]!='@@':
+            description=description+'@@'
+
+        temp_array=[]
+
+        matches = list(re.finditer('@@', description))
+        
+        for one_match in [(matches[x],matches[x+1]) for x in range(len(matches)-1)]:
+            temp_array.append(description[one_match[0].end():one_match[1].start()])
+
+        temp_array_two=zip(temp_array[::2], temp_array[1::2])
+        for index,one_piece in enumerate(temp_array_two):
+            return_value.append({
+                'color':one_piece[0],
+                'text':one_piece[1],
+                'index':index
+            })
+        
+        return return_value
     
     def dictionary_for_location_page(self):
         return{
