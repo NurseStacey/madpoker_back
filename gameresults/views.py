@@ -38,8 +38,8 @@ class UpdateRosterOnlyPositionAPI(APIView):
     def post(self, request, *args, **kwargs):
 
         def calculate_points(position):
-            if position<10:
-                return 2*(number_of_players-position+1)
+            if position>(number_of_players-10):
+                return 2*(position+1)
             else:
                 return number_of_players-position+1            
             
@@ -48,7 +48,6 @@ class UpdateRosterOnlyPositionAPI(APIView):
         which_game=-1
         for onePlayer in request.data['allUsers']:           
             try:
-
                 thisRecord= GameResultModel.objects.get(id=onePlayer['id'])
                 if str(onePlayer['position']).isdigit():
                     which_game=thisRecord.game.id
