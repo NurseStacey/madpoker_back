@@ -10,7 +10,8 @@ from gameresults.models import GameResultModel
 from players.models import PlayerModel
 from django.db.models import ProtectedError
 from django.http import JsonResponse
-
+import datetime
+import itertools
 
       
 class GameModelAPI(APIView):
@@ -272,13 +273,153 @@ class GamesForRostersView(APIView):
             all_game_data.append(oneGame.RosterDictionary())
         
         #all_venues = list(set([x['venue'] for x in all_game_data]))
-
+        pass
 
         return Response({
             'all_game_data':all_game_data,
             'directors':set([x['director'] for x in all_game_data]),
-            'venues':set([x['venue'] for x in all_game_data])
+            'venues':set([x['venue'] for x in all_game_data]),
+            'all_dates':[x for y in all_game_data for x in y['dates']]
         }, status=status.HTTP_200_OK)   
+
+class GameInfoForReview(APIView):
+    def get(self, request, *args, **kwargs):
+        return_value=[]
+
+        try:
+            for oneGame in GameModel.objects.all():
+                return_value.append({
+                    'title':oneGame.GetText(),
+                    'dates':[x.get_date_with_ID() for x in self.played_games.all()]
+                })
+        except Exception as e:
+            print(e)
+            return Response({'status':'problem getting game info'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({
+            'all_data':return_value
+        })
+    
+class PlayedGamesEvents(APIView):
+    def get(self, request,  id, *args, **kwargs):
+
+        try:
+            thisGame = PlayedGameModel.objects.get(id=id)
+            #serializer= PlayedGamesSerializer(thisGame, many=True)
+            #print(serializer.data)
+            return Response({'data':thisGame.get_players()},status=status.HTTP_200_OK)
+        except Exception as e:
+
+            print(e)
+            return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self,request,id,*args,**kwargs):
+        try:
+            thisGame = PlayedGameModel.objects.get(id=id)
+            thisGame.finalized=request.data['finalized']
+            thisGame.save()
+            
+            return Response({'status':'finalized'},status=status.HTTP_200_OK)
+        except:
+            return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)
+
+players_for_testing=[
+    'DAVID GEARHART',
+    'KIM WOOLAM',
+    'CHRISTOPHE POULIN',
+    'JEANETTE MEIN',
+    'JEFF MOORE',
+    'SHAD POLLARI',
+    'JAYE TYLER',
+    'CHARLIE TURNER',
+    'RANDY SMITH',
+    'LA CUCARACHA',
+    'MATT STEIN',
+    'MICHAEL ANDERSON-NATHE',
+    'DEBBIE WEST',
+    'TRAVIS SPENCER',
+    'FRANK HUI',
+    'RON BOYLES',
+    'RUDY MAMARADLO',
+    'CATHY CULVER',
+    'SCOTT MEIN',
+    'DAVID ANDEREGG'
+]
+
+import math
+def isPrime(this_number):
+
+    for index in range(math.sqrt(this_number)):
+        if this_number%index==0:
+            return False
+        
+    return True
+def CreateTestingData(request, *args, **kwargs):
+    
+    PlayedGameModel.objects.all().delete()
+    PlayerModel.objects.all().delete()
+    GameResultModel.objects.all().delete()
+
+    password='password'
+    phone='503-555-1212'
+
+#first make the players
+    for index,one_name in enumerate(players_for_testing):
+        partitioned_name=one_name.partition(' ')
+        first_name=partitioned_name[0]
+        last_name=partitioned_name[2]
+        player=last_name+first_name[0]
+        email=player+'@gmail.com'
+        PlayerModel.objects.create(
+            id=index+100,
+            password=password,
+            phone=phone,
+            first_name=first_name,
+            last_name=last_name,
+            player=player,
+            email=email
+        )
+
+    initial_date = datetime.date(2025,7,1)
+
+    for days_offset in range(7):
+        this_date=initial_date + datetime.timedelta(days=days_offset)
+        these_games=GameModel.objects.filter(week_day__iexact=this_date.strftime('%A'))
+        one_week=datetime.timedelta(days=7)
+        end_date=datetime.date(2026,3,30)
+        while this_date<end_date:
+
+            for one_game in these_games:
+                this_played_game=PlayedGameModel.objects.get_or_create(
+                    which_game=one_game,
+                    date=this_date
+                )
+
+                index_for_iterator =(date(2026,9,1)-this_date).days
+                while not isPrime(index_for_iterator):
+                    index_for_iterator+=1
+                    
+                this_order=[]
+                for index in range(19):
+                    this_order.append(index_for_iterator%19)
+                    index_for_iterator+=index_for_iterator
+
+                for position,one_index in enumerate(this_order):
+                    this_player=PlayerModel.objects.get(id=one_index+100)
+                    points=19-position
+                    if position<10:
+                        points*=2
+                    GameResultModel.objects.create(
+                        player=this_player,
+                        position=position,
+                        points=points,
+                        game=this_played_game
+                    )
+
+            this_date=this_date+one_week
+
+    #print('here')
+    return JsonResponse({})
 
 # class GetThisPlayerResults(APIView):
 #     def get(self, request, id, *args, **kwargs):
@@ -354,29 +495,6 @@ class GamesForRostersView(APIView):
 #         except Exception as e:
 #             print(e)
 
-#             return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)
-
-# class PlayedGamesEvents(APIView):
-#     def get(self, request,  id, *args, **kwargs):
-
-#         try:
-#             thisGame = PlayedGameModel.objects.get(id=id)
-#             #serializer= PlayedGamesSerializer(thisGame, many=True)
-#             #print(serializer.data)
-#             return Response({'data':thisGame.get_players()},status=status.HTTP_200_OK)
-#         except Exception as e:
-
-#             print(e)
-#             return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)
-
-#     def patch(self,request,id,*args,**kwargs):
-#         try:
-#             thisGame = PlayedGameModel.objects.get(id=id)
-#             thisGame.finalized=request.data['finalized']
-#             thisGame.save()
-            
-#             return Response({'status':'finalized'},status=status.HTTP_200_OK)
-#         except:
 #             return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)
 
  

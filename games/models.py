@@ -25,7 +25,6 @@ class GameModel(models.Model):
     week_day = models.CharField(max_length=10)
     time=models.CharField(max_length=10)
     venue=models.ForeignKey(VenueModel, null=True, on_delete=models.PROTECT)
-    #all_sections=models.ManyToManyField(SectionModel,through='SectionThrough', related_name='game_sections')
     active=models.BooleanField(default=True)  
     director=models.ForeignKey(UserModel, on_delete=models.SET_NULL, null=True)
     description=models.CharField(max_length=250, null=True, blank=True)
@@ -118,7 +117,7 @@ class GameModel(models.Model):
             }
     
     def get_dates(self):
-        datelist = [{'date':x.date,'id':x.id} for x in self.game_details.all()]
+        datelist = [{'date':x.date,'id':x.id} for x in self.played_games.all()]
         datelist.sort(key=lambda x: x['date'], reverse=True)
         return [{'date':x['date'].strftime('%m-%d'),'id':x['id']} for x in datelist]
 

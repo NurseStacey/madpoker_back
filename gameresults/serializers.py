@@ -7,7 +7,7 @@ from zoneinfo import ZoneInfo
 class GameResultsSerializer(serializers.ModelSerializer):
     player_name = serializers.CharField(source='player.player', read_only=True)
     registration_date_time_str = serializers.SerializerMethodField()
-    other_evenets = serializers.SerializerMethodField()
+    #other_evenets = serializers.SerializerMethodField()
 
     class Meta:
         model=GameResultModel

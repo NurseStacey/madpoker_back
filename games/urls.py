@@ -9,9 +9,12 @@ urlpatterns = [
     path('get_game_types/',GameTypeView.as_view() , name='get_game_types'),
     path('one_game_type/<int:id>/',GameTypeView.as_view() , name='one_game_types'),
     path('games_for_roster/',GamesForRostersView.as_view() , name='games_for_roster'),
+    path('played_games_events/<int:id>/', PlayedGamesEvents.as_view(), name='events-for-player'),
+    path('gameinfo_for_review/', GameInfoForReview.as_view(), name='gameinfo-for-review'),
+    path('test/',CreateTestingData)
     # path('games_by_director/<int:id>/',GamesByDirectorAPI.as_view(), name='games_by_director'),
     # 
-    # path('played_games_events/<int:id>/', PlayedGamesEvents.as_view(), name='events-for-player'),
+    # 
     # path('sections/',SectionsAPI.as_view(), name='sections'), 
     # path('get_all_sections/', AllSectionsAPI.as_view(), name='sections'),
     # path('one_section/<int:id>/',SectionsAPI.as_view(), name='one_event'),

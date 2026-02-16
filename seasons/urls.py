@@ -3,7 +3,8 @@ from .views import *
 
 
 urlpatterns = [
-    path('seasons/', SeasonModelAPI.as_view(), name='seasontypes'),
+    path('seasons/', SeasonModelAPI.as_view(), name='seasons'),
     path('oneseason/<int:id>/', SeasonModelAPI.as_view(), name='oneseasons'),
-    path('seasontypes/', SeasonTypeModelAPI.as_view(), name='seasons'),
+    path('seasontypes/', SeasonTypeModelAPI.as_view(), name='seasontypes'),
+    path('seasonforgameresults/', SeasonsWithVenuesGamesAPI.as_view(), name='seasonforgameresults'),
 ]
