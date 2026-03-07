@@ -5,6 +5,7 @@ from players.models import PlayerModel
 from games.models import PlayedGameModel,GameModel
 import datetime
 from django.http import JsonResponse
+import json
 
 players_for_testing=[
     'DAVID GEARHART',
@@ -32,16 +33,20 @@ players_for_testing=[
 import math
 def isPrime(this_number):
 
-    for index in range(math.sqrt(this_number)):
-        if this_number%index==0:
-            return False
+    try:
+        for index in range(2,int(math.sqrt(this_number))):
+            if this_number%index==0:
+                return False
+    except:
+        pass
         
     return True
 def CreateTestingData(request, *args, **kwargs):
     
+    GameResultModel.objects.all().delete()
     PlayedGameModel.objects.all().delete()
     PlayerModel.objects.all().delete()
-    GameResultModel.objects.all().delete()
+    
 
     password='password'
     phone='503-555-1212'
@@ -65,41 +70,74 @@ def CreateTestingData(request, *args, **kwargs):
 
     initial_date = datetime.date(2025,7,1)
 
-    for days_offset in range(7):
-        this_date=initial_date + datetime.timedelta(days=days_offset)
-        these_games=GameModel.objects.filter(week_day__iexact=this_date.strftime('%A'))
-        one_week=datetime.timedelta(days=7)
-        end_date=datetime.date(2026,3,30)
-        while this_date<end_date:
+    output_results_for_file=[]
+    try:
+            
+        for days_offset in range(7):
+            this_date=initial_date + datetime.timedelta(days=days_offset)
+            these_games=GameModel.objects.filter(week_day__iexact=this_date.strftime('%A'))
+            one_week=datetime.timedelta(days=7)
+            end_date=datetime.date(2026,3,30)
+            while this_date<end_date:
+                print(this_date.strftime('%m-%d-%Y'))
 
-            for one_game in these_games:
-                this_played_game=PlayedGameModel.objects.get_or_create(
-                    which_game=one_game,
-                    date=this_date
-                )
+                if this_date==datetime.date(2025,12,7):
+                    pass
+                for one_game in these_games:
+                    if this_date.year==2026 and one_game.id in [1,3]:
+                        break
+                    if this_date.year==2025 and one_game.id in [10,11]:
+                        break
 
-                index_for_iterator =(datetime.date(2026,9,1)-this_date).days
-                while not isPrime(index_for_iterator):
-                    index_for_iterator+=1
-                    
-                this_order=[]
-                for index in range(19):
-                    if not index_for_iterator%19 in this_order:  ###this should not happen if I remember prime cycles correctly
-                        this_order.append(index_for_iterator%19)
-                    index_for_iterator+=index_for_iterator
-
-                for position,one_index in enumerate(this_order):
-                    this_player=PlayerModel.objects.get(id=one_index+100)
-                    points=19-position
-                    if position<10:
-                        points*=2
-                    GameResultModel.objects.create(
-                        player=this_player,
-                        position=position,
-                        points=points,
-                        game=this_played_game
+                    this_played_game, created=PlayedGameModel.objects.get_or_create(
+                        which_game=one_game,
+                        date=this_date
                     )
 
-            this_date=this_date+one_week
+                    one_game_results = {
+                        'played_date':this_date.strftime('%m-%d-%Y'),
+                        'which_game':one_game.GetText(),
+                        'players':[]
+                    }
+                    if created:
+                        index_for_iterator =(datetime.date(2026,9,1)-this_date).days
+                        while not isPrime(index_for_iterator):
+                            index_for_iterator+=1
+                            
+                        this_order=[]
+                        for index in range(19):
+                            if not index_for_iterator%19 in this_order:  ###this should not happen if I remember prime cycles correctly
+                                this_order.append(index_for_iterator%19)
+                            index_for_iterator+=index_for_iterator
 
+                        for position,one_index in enumerate(this_order):
+                            this_player=PlayerModel.objects.get(id=one_index+100)
+                            points=position
+                            if position>(len(this_order)-10):
+                                points*=2
+
+                            one_game_results['players'].append({
+                                'player':this_player.player,
+                                'position':position,
+                                'points':points
+                            })
+                            
+                
+                            GameResultModel.objects.create(
+                                player=this_player,
+                                position=position,
+                                points=points,
+                                game=this_played_game
+                            )
+                    output_results_for_file.append(one_game_results)
+                    this_played_game.finalized=True
+                    this_played_game.save()
+                    
+                this_date=this_date+one_week
+    except Exception as e:
+        pass
+
+    this_file=open('outputfile','w')
+    this_file.write(json.dumps(output_results_for_file, indent=4))
+    print('done')
     return JsonResponse({})

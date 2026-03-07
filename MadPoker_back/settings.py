@@ -38,7 +38,8 @@ INSTALLED_APPS = [
     'players',
     'seasons',
     'gameresults',
-    'learning'
+    'learning',
+    'consolidated_data'
 ]
 
 MIDDLEWARE = [
