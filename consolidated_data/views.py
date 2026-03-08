@@ -7,11 +7,53 @@ import itertools
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from players.models  import PlayerModel
+from games.models import GameModel,PlayedGameModel
+from seasons.models import SeasonModel
+from venues.models import VenueModel
+from gameresults.models import GameResultModel
 
 class PullDataForPoints(APIView):
-    def get(self, request, *args, **kwargs):
+    def get(self, request, playerid, seasonid, venueid,*args, **kwargs):
+        
+        try:
+            thisPlayerRec=PlayerModel.objects.get(id=playerid)
+        except:
+            return Response({'result':'Problem with getting player data.'}, status=status.HTTP_404_NOT_FOUND)
 
-        return Response({}, status=status.HTTP_200_OK)
+        these_games = GameModel.objects.all()
+        thisSeasonRec=None
+        if seasonid>0:
+            try:
+                thisSeasonRec=SeasonModel.objects.get(id=seasonid)
+                these_games=these_games.filter(season_type=thisSeasonRec.season_type)
+            except:
+                pass
+        
+        if venueid>0:
+            try:
+                thisVenueRec=VenueModel.objects.get(id=venueid)
+                these_games=these_games.filter(venue=thisVenueRec)
+            except:
+                pass
+        
+        try:
+            these_played_games =PlayedGameModel.objects.filter(which_game__in=these_games)
+            these_results = GameResultModel.objects.filter(player=thisPlayerRec).filter(game__in=these_played_games)
+            if thisSeasonRec!=None:
+                these_results=these_results.filter(date__gte=thisSeasonRec.start_date).filter(date__lt=thisSeasonRec.end_date)
+            
+            individual_game_results=[]
+            for one_result in these_games.order_by('-date'):
+                individual_game_results.append(one_result.this_result())
+
+        except:
+            return Response({
+                'result':'OK',
+                'individual_game_results':individual_game_results
+                }, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({'result':'OK'}, status=status.HTTP_200_OK)
     
 class InfoForSearch(APIView):
     def get(self,  request, *args,**kwargs):
