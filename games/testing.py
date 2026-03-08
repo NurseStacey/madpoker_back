@@ -137,7 +137,7 @@ def CreateTestingData(request, *args, **kwargs):
     except Exception as e:
         pass
 
-    this_file=open('outputfile','w')
+    this_file=open('testing_data','w')
     this_file.write(json.dumps(output_results_for_file, indent=4))
     print('done')
     return JsonResponse({})
