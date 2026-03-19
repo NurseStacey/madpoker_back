@@ -11,6 +11,7 @@ urlpatterns = [
     path('games_for_roster/',GamesForRostersView.as_view() , name='games_for_roster'),
     path('played_games_events/<int:id>/', PlayedGamesEvents.as_view(), name='events-for-player'),
     path('gameinfo_for_review/', GameInfoForReview.as_view(), name='gameinfo-for-review'),
+    path('played_game_list/<str:seasonidstr>/<str:venueidstr>/',PlayedGamesList.as_view(), name='played_game_list'), 
     path('test/',CreateTestingData)
     # path('games_by_director/<int:id>/',GamesByDirectorAPI.as_view(), name='games_by_director'),
     # 

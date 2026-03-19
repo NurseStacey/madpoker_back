@@ -164,3 +164,15 @@ class GamesRegistrationsAPI(APIView):
             return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response({'status':'player added'}, status=status.HTTP_201_CREATED)
+
+class ThisGameResult(APIView):
+    def get(self, request, id, *args, **kwargs):
+
+        this_game_result=[]
+
+        for one_result in GameResultModel.objects.filter(game=PlayedGameModel.objects.get(id=id)).order_by('position'):
+            this_game_result.append(one_result.this_result_no_venue())
+            
+        return Response({
+            'this_game_result':this_game_result
+            }, status=status.HTTP_200_OK)            

@@ -110,7 +110,7 @@ def CreateTestingData(request, *args, **kwargs):
                                 this_order.append(index_for_iterator%19)
                             index_for_iterator+=index_for_iterator
 
-                        for position,one_index in enumerate(this_order):
+                        for position,one_index in enumerate(this_order, start=1):
                             this_player=PlayerModel.objects.get(id=one_index+100)
                             points=position
                             if position>(len(this_order)-10):

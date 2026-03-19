@@ -108,6 +108,7 @@ class GameModel(models.Model):
         return return_value
     
     def dictionary_for_location_page(self):
+
         return{
                 'venue_name':self.venue.venue_name,   
                 'description':self.description,             
@@ -152,34 +153,60 @@ class PlayedGameModel(models.Model):
     date= models.DateField(default=timezone.now)
     finalized=models.BooleanField(default=False)
     
+    def get_week_day(self):
+        return self.which_game.week_day
+    
     def get_date_with_ID(self):
         return {'date':self.date.strftime('%m-%d-%Y'),'id':self.id}
     
     def get_venue_name(self):
-        return self.which_game.game.venue.venue_name
+        return self.which_game.venue.venue_name
+    
+    def get_game_type(self):
+        return self.which_game.game_type.name
     
     def get_dictionary_for_results_view(self):
         pass
         try:
             return({
-                'venue':self.which_game.game.venue.venue_name,
-                'date':self.date,
+                'venue':self.which_game.venue.venue_name,
+                'date':self.date.strftime('%m/%d/%Y'),
                 'season':self.get_season(),
-                'section':self.which_game.section.name,
+                'season_start_date':self.get_season_start_date(),
+                #'section':self.which_game.section.name,
                 'id':self.id
             })
         except Exception as e:
             print(e)
             return({})
     
-    def get_season(self):
-        this_season_type=self.which_game.game.season_type
-        this_season=SeasonModel.objects.filter(
+    def get_season_start_date(self):
+        this_season_type=self.which_game.season_type
+        
+        try:
+            this_season=SeasonModel.objects.filter(
             season_type=this_season_type).filter(
                 start_date__lte=self.date).get(
                     end_date__gte=self.date
                 )
-        return this_season.season
+        
+            return this_season.start_date
+        except:
+            return date(2015,1,1)
+                
+    def get_season(self):
+        this_season_type=self.which_game.season_type
+        
+        try:
+            this_season=SeasonModel.objects.filter(
+            season_type=this_season_type).filter(
+                start_date__lte=self.date).get(
+                    end_date__gte=self.date
+                )
+        
+            return this_season.season
+        except:
+            return 'no associated season'
 
     def get_other_events(self):
 
