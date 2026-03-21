@@ -42,22 +42,31 @@ class PullDataForPoints(APIView):
                 pass
         
         try:
-            these_played_games=None
+            these_played_games=PlayedGameModel.objects.filter(
+                    finalized=True).filter(
+                            which_game__in=these_games)
             if thisSeasonRec==None:
-                these_played_games=PlayedGameModel.objects.filter(
-                    finaliezed=True).filter(
-                            which_game__in=these_games).order_by('-date')            
+                these_played_games=these_played_games.order_by('-date')      
             else:
-
-                these_played_games=PlayedGameModel.objects.filter(
-                    finaliezed=True).filter(
+                these_played_games=these_played_games=these_played_games.filter(
                     date__gte=thisSeasonRec.start_date).filter(
-                        date__lt=thisSeasonRec.end_date).filter(
-                            which_game__in=these_games).order_by('-date')
+                        date__lt=thisSeasonRec.end_date).order_by('-date') 
+                # PlayedGameModel.objects.filter(
+                #     finalized=True).filter(
+                #     date__gte=thisSeasonRec.start_date).filter(
+                #         date__lt=thisSeasonRec.end_date).filter(
+                #             which_game__in=these_games).order_by('-date')
 
             individual_game_results={}
             what_seasons = []
             season_summary={}
+
+            all_results_filter=GameResultModel.objects.filter(player=thisPlayerRec).filter(game__in=these_played_games)
+            pass
+            which_seasons=set([x.get_season() for x in all_results_filter])
+            
+            # for one_game in all_results_filter:
+            #     individual_game_results
             for one_game in these_played_games:
                 try:
                     one_result= GameResultModel.objects.filter(player=thisPlayerRec).get(game=one_game)
@@ -86,7 +95,8 @@ class PullDataForPoints(APIView):
                 except:
                     pass
 
-        except:
+        except Exception as e:
+            print(e)
             return Response({
                 'result':'Problem',
                 }, status=status.HTTP_400_BAD_REQUEST)

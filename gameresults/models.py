@@ -5,7 +5,10 @@ from django.utils import timezone
 from datetime import date
 
 class GameResultModel(models.Model):
-    player=models.ForeignKey(PlayerModel,  default=PlayerModel.get_default_pk, on_delete=models.PROTECT)
+    player=models.ForeignKey(PlayerModel,  
+                             default=PlayerModel.get_default_pk, 
+                             on_delete=models.PROTECT,
+                             related_name='PlayerResult')
     position=models.IntegerField(default=0)
     points=models.IntegerField(default=0)
     registration_date_time=models.DateTimeField(default=timezone.now)
@@ -23,6 +26,9 @@ class GameResultModel(models.Model):
             'points':self.points
         }
 
+    
+    def get_season(self):
+        return self.game.get_season()
     
     def this_result(self):
         game_info = self.game.get_dictionary_for_results_view()

@@ -151,8 +151,17 @@ class PlayedGameModel(models.Model):
                                   null=True, 
                                   related_name='played_games')
     date= models.DateField(default=timezone.now)
+    season = models.ForeignKey(SeasonModel, 
+                               null=True, 
+                               on_delete=models.PROTECT, 
+                               related_name='playedgame_season')
     finalized=models.BooleanField(default=False)
     
+    def save(self, *args, **kwargs):
+
+        self.season=self.get_season_record()
+        super(PlayedGameModel,self).save(*args,**kwargs)
+
     def get_week_day(self):
         return self.which_game.week_day
     
@@ -193,7 +202,21 @@ class PlayedGameModel(models.Model):
             return this_season.start_date
         except:
             return date(2015,1,1)
-                
+
+    def get_season_record(self):
+        this_season_type=self.which_game.season_type
+        
+        try:
+            this_season=SeasonModel.objects.filter(
+            season_type=this_season_type).filter(
+                start_date__lte=self.date).get(
+                    end_date__gte=self.date
+                )
+        
+            return this_season
+        except:
+            return None
+                            
     def get_season(self):
         this_season_type=self.which_game.season_type
         
