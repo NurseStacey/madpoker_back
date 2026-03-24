@@ -205,7 +205,7 @@ class PlayedGameModel(models.Model):
 
     def get_season_record(self):
         this_season_type=self.which_game.season_type
-        
+
         try:
             this_season=SeasonModel.objects.filter(
             season_type=this_season_type).filter(

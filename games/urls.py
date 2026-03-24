@@ -16,7 +16,7 @@ urlpatterns = [
     # path('games_by_director/<int:id>/',GamesByDirectorAPI.as_view(), name='games_by_director'),
     # 
     # 
-    # path('sections/',SectionsAPI.as_view(), name='sections'), 
+    #path('sections/',SectionsAPI.as_view(), name='sections'), 
     # path('get_all_sections/', AllSectionsAPI.as_view(), name='sections'),
     # path('one_section/<int:id>/',SectionsAPI.as_view(), name='one_event'),
     # path('sectionthrough/',SectionsThroughAPI.as_view(), name='section_through'),

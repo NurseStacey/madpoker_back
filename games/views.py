@@ -10,6 +10,7 @@ from gameresults.models import GameResultModel
 from players.models import PlayerModel
 from django.db.models import ProtectedError
 from django.http import JsonResponse
+from django.db.models import F
 
       
 class GameModelAPI(APIView):
@@ -318,13 +319,11 @@ class PlayedGamesList(APIView):
         seasonid=int(seasonidstr)
         venueid=int(venueidstr)       
 
-
-        these_games = GameModel.objects.all()
         thisSeasonRec=None
         if seasonid>0:
             try:
-                thisSeasonRec=SeasonModel.objects.get(id=seasonid)
-                these_games=these_games.filter(season_type=thisSeasonRec.season_type)
+               thisSeasonRec=SeasonModel.objects.get(id=seasonid)
+        #         these_games=these_games.filter(season_type=thisSeasonRec.season_type)
             except:
                 pass
         
@@ -335,21 +334,32 @@ class PlayedGamesList(APIView):
                 these_games=these_games.filter(venue=thisVenueRec)
             except:
                 pass
-        these_played_games = PlayedGameModel.objects.filter(
-            finalized=True).filter(
-                which_game__in= these_games).order_by('-date')
+        these_played_games = PlayedGameModel.objects.filter(finalized=True)
+        if not thisSeasonRec==None:
+            these_played_games=these_played_games.objects.filter(season=thisSeasonRec)
 
-        these_played_games_list=[]
-        for one_played_game in these_played_games:
-            these_played_games_list.append({
-                'venue':one_played_game.get_venue_name(),
-                'date':one_played_game.date,
-                'season':one_played_game.get_season(),
-                'weekday':one_played_game.get_week_day(),
-                'gametype':one_played_game.get_game_type(),
-                'id':one_played_game.id
-            })
+        serializer = PlayedGamesListSerializer(these_played_games, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+    
+        # these_played_games=these_played_games.annotate(
+        #     weekday=F('which_game__week_day')).annotate(
+        #         gametype=F('which_game__game_type__name')).annotate(
+        #         season_name=F('season__season')).annotate(
+        #             venue=F('which_game__venue__venue_name')).order_by(
+        #         '-date')
+            
+
+        # these_played_games_list=[]
+        # for one_played_game in these_played_games:
+        #     these_played_games_list.append({
+        #         'venue':one_played_game.get_venue_name(),
+        #         'date':one_played_game.date,
+        #         'season':one_played_game.get_season(),
+        #         'weekday':one_played_game.get_week_day(),
+        #         'gametype':one_played_game.get_game_type(),
+        #         'id':one_played_game.id
+        #     })
         return Response({
-            'these_played_games_list':these_played_games_list
+            'these_played_games_list':these_played_games
             }, status=status.HTTP_200_OK)
 

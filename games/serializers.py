@@ -18,6 +18,15 @@ class GamesTypesSerializer(serializers.ModelSerializer):
         model = GameTypeModel
         fields ='__all__'
 
+class PlayedGamesListSerializer(serializers.ModelSerializer):
+    venue=serializers.CharField(source='which_game.venue.venue_name')
+    season_name=serializers.CharField(source='season.season')
+    game_type=serializers.CharField(source='which_game.game_type.name')
+    week_day=serializers.CharField(source='which_game.week_day')
+
+    class Meta:
+        model=PlayedGameModel
+        fields=['id', 'season_name', 'venue', 'date',  'game_type', 'week_day']
 
 class PlayedGamesSerializer(serializers.ModelSerializer):
 
