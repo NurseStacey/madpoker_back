@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from gameresults.models import *
 from .models import *
 from zoneinfo import ZoneInfo
     
@@ -6,7 +7,7 @@ class GamesSerializer(serializers.ModelSerializer):
     game_text = serializers.SerializerMethodField()
 
     class Meta:
-        model = GameModel
+        model = GameResultModel
         fields ='__all__'    
 
     def get_game_text(self,obj):

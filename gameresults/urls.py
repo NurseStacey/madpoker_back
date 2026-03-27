@@ -8,5 +8,6 @@ urlpatterns = [
     path('update_roster_only_position/',UpdateRosterOnlyPositionAPI.as_view(), name='update_roster'),    
     path('remove_player_from_game/<int:id>/',GameResultsAPI.as_view(), name='remove_layer_from_game'),
     path('register_player_for_game/', GamesRegistrationsAPI.as_view(), name='games-for-player'),       
-    path('this_game_results/<int:id>',ThisGameResult.as_view(),name='this_game_results')        
+    path('this_game_results/<int:id>',ThisGameResult.as_view(),name='this_game_results'),
+    path('pull_data_for_points/<str:playeridstr>/<str:seasonidstr>/<str:venueidstr>/', PullDataForPoints.as_view(), name='info_for_search'),           
 ]

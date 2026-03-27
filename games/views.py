@@ -316,6 +316,8 @@ class PlayedGamesEvents(APIView):
 
 class PlayedGamesList(APIView):
     def get(self,request,venueidstr,seasonidstr, *args, **kwargs):
+
+        #seasonidstr and venueidstr are always -1 =>filtering in the front end
         seasonid=int(seasonidstr)
         venueid=int(venueidstr)       
 
@@ -327,39 +329,20 @@ class PlayedGamesList(APIView):
             except:
                 pass
         
+        these_games=None
         thisVenueRec=None
         if venueid>0:
             try:
                 thisVenueRec=VenueModel.objects.get(id=venueid)
-                these_games=these_games.filter(venue=thisVenueRec)
+                these_games= GameModel.objects.filter(venue=thisVenueRec)
             except:
                 pass
         these_played_games = PlayedGameModel.objects.filter(finalized=True)
         if not thisSeasonRec==None:
             these_played_games=these_played_games.objects.filter(season=thisSeasonRec)
-
+        if not these_games==None:
+            these_played_games=these_played_games.objects.filter(which_game__in=these_games)
+            
         serializer = PlayedGamesListSerializer(these_played_games, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
     
-        # these_played_games=these_played_games.annotate(
-        #     weekday=F('which_game__week_day')).annotate(
-        #         gametype=F('which_game__game_type__name')).annotate(
-        #         season_name=F('season__season')).annotate(
-        #             venue=F('which_game__venue__venue_name')).order_by(
-        #         '-date')
-            
-
-        # these_played_games_list=[]
-        # for one_played_game in these_played_games:
-        #     these_played_games_list.append({
-        #         'venue':one_played_game.get_venue_name(),
-        #         'date':one_played_game.date,
-        #         'season':one_played_game.get_season(),
-        #         'weekday':one_played_game.get_week_day(),
-        #         'gametype':one_played_game.get_game_type(),
-        #         'id':one_played_game.id
-        #     })
-        return Response({
-            'these_played_games_list':these_played_games
-            }, status=status.HTTP_200_OK)
-
