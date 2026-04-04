@@ -41,6 +41,36 @@ def isPrime(this_number):
         pass
         
     return True
+
+def PrintTestFile(request, *args, **kwargs):
+    with open('testing_data.txt', 'r', encoding='utf-8') as file:
+        data = json.load(file)
+
+    for one_record in data:
+        thisDate=one_record['played_date'].split('-')
+        if thisDate[2]=='2026':
+            one_record['season']=37
+        elif int(thisDate[0])>9:
+            one_record['season']=36
+        else:
+            one_record['season']=35
+
+    thisSeason=[x for x in data if x['season']==37]
+    list_player_results=[y for  x in thisSeason for y in x['players']]
+
+    thePlayers = set([x['player'] for  x in list_player_results])
+    total_points={}
+    average_points={}
+    average_position={}
+    for  onePlayer  in thePlayers:
+        points_list=[x['points'] for x in list_player_results if x['player']==onePlayer]
+        total_points[onePlayer]=sum(points_list)
+        average_points[onePlayer]=sum(points_list)/len(points_list)
+        position_list=[x['position'] for x in list_player_results if x['player']==onePlayer]
+        average_position[onePlayer]=sum(position_list)/len(position_list)
+
+    return JsonResponse({})
+
 def CreateTestingData(request, *args, **kwargs):
     
     GameResultModel.objects.all().delete()
@@ -137,7 +167,7 @@ def CreateTestingData(request, *args, **kwargs):
     except Exception as e:
         pass
 
-    this_file=open('testing_data','w')
+    this_file=open('testing_data.txt','w')
     this_file.write(json.dumps(output_results_for_file, indent=4))
     print('done')
     return JsonResponse({})

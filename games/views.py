@@ -26,7 +26,6 @@ class GameModelAPI(APIView):
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
     
     def post(self, request,*args, **kwargs):
-        #print('here')
         try:
             serializer = GamesSerializer(data=request.data)
             if serializer.is_valid():
@@ -36,23 +35,7 @@ class GameModelAPI(APIView):
             print(e)
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        # thisRecord=SectionThrough(
-        #     #section=SectionModel.objects.get(name='Texas Holdem'),
-        #     game=GameModel.objects.get(id=serializer.data['id']),
-        #     description=request.data['description']
-        # )
-
-        # thisRecord.save()
-        # try:
-        #     thisDirector = UserModel.objects.get(id=request.data['director'])
-        #     thisRecord.director=thisDirector
-        #     thisRecord.save()
-        # except:
-        #     pass
-        
         return Response(serializer.data, status=status.HTTP_201_CREATED)
-
-
 
 class OneGameModelAPI(APIView):
     #used when we need to get one game or alter a game.
@@ -68,30 +51,6 @@ class OneGameModelAPI(APIView):
             print(e)
             return Response({'status':'Problem'}, status=status.HTTP_400_BAD_REQUEST)
     
-    # def post(self, request,*args, **kwargs):
-
-    #     try:
-    #         serializer = GamesSerializer(data=request.data)
-    #         if serializer.is_valid():
-    #             serializer.save()
-
-    #             TexasHoldemSection=SectionModel.objects.get(name='Texas Holdem')
-    #             try:
-    #                 thisSectionThrough=SectionThrough.objects.filter(game=request.data['id']).get(section=TexasHoldemSection)
-    #                 thisSectionThrough.description=request.data['description']
-    #                 thisSectionThrough.save()
-    #                 print('section  updated')
-    #             except:
-    #                 pass
-
-    #             return Response(serializer.data, status=status.HTTP_201_CREATED)
-    #     except:
-            
-    #         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    #     #
-    #     #print(serializer.errors)
-    #     return Response({'error':'invalid data'}, status=status.HTTP_400_BAD_REQUEST)
-    
     def delete(self, request,id,*args, **kwargs):
 
         try:
@@ -105,22 +64,6 @@ class OneGameModelAPI(APIView):
                 PlayedGameModel.objects.filter(which_game=thisRecord).delete()
                 thisRecord.delete()
 
-            # print('protected error')
-            # for oneSection in SectionThrough.objects.filter(game=thisRecord):
-            #     if oneSection.need_to_protect():
-            #         return Response({'status':'protected'}, status=status.HTTP_403_FORBIDDEN)  
-            
-            # try:
-            #     for oneSection in SectionThrough.objects.filter(game=thisRecord):
-            #         for oneplayedgame in PlayedGameModel.objects.filter(which_game=oneSection):
-            #             oneplayedgame.delete()
-            #         oneSection.delete()
-            
-            #     thisRecord.delete() 
-            # except Exception as e:
-            #     print('other protected error')
-            #     print(e)
-            #     return Response({}, status=status.HTTP_400_BAD_REQUEST)
         except Exception as e:
 
             return Response({}, status=status.HTTP_400_BAD_REQUEST)
@@ -138,28 +81,6 @@ class OneGameModelAPI(APIView):
         except:
             return Response({'status':'trouble with updating game'}, status=status.HTTP_400_BAD_REQUEST)
 
-        # try:
-        #     SectionToUpdate=None
-        #     AllSectionThrough=SectionThrough.objects.filter(game=thisRecord)
-            
-        #     if AllSectionThrough.count()==1:
-        #         SectionToUpdate=AllSectionThrough[0]
-                
-        #     elif AllSectionThrough.filter(section=SectionModel.objects.get(name='Texas Holdem')).count()==1:
-        #         print('three')
-        #         SectionToUpdate=AllSectionThrough.get(section=SectionModel.objects.get(name='Texas Holdem'))
-        #     else:
-        #         return Response({'status':'no section updated'}, status=status.HTTP_200_OK)
-            
-        #     SectionToUpdate.director=UserModel.objects.get(id=request.data['director'])
-        #     print(request.data)
-        #     SectionToUpdate.description=request.data['description']
-        #     print('one')
-        #     SectionToUpdate.save()
-        #     print('two')
-        # except:
-        #     return Response({'status':'trouble with section'}, status=status.HTTP_400_BAD_REQUEST)
-        
         return Response({}, status=status.HTTP_200_OK)   
 
 
@@ -345,4 +266,39 @@ class PlayedGamesList(APIView):
             
         serializer = PlayedGamesListSerializer(these_played_games, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
+class GetCanceledGames(APIView):
+    def get(self,  *args, **kwargs):
+
+        try:
+            CanceledGames = CanceledGamesModel.objects.filter(date__gte=datetime.today())
+            serializer = CanceledGamesSerializer(CanceledGames, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except Exception as e:
+            print(e)
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)
+        
+    def post(self, request,*args, **kwargs):
+        try:
+            serializer = CanceledGamesSerializer(data=request.data)
+            if serializer.is_valid():
+                serializer.save()
+
+        except Exception as e:
+            print(e)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({}, status=status.HTTP_200_OK)        
+
+class UnCancelGame(APIView):
+    def delete(self, request,id,*args, **kwargs):
+
+        try:
+            thisRecord = CanceledGamesModel.objects.get(id=id)
+            thisRecord.delete()
+
+        except Exception as e:
+            print(e)
+            return Response({'error':'Not able to delete cancelation'}, status=status.HTTP_400_BAD_REQUEST)  
+
+        return Response({}, status=status.HTTP_200_OK)             

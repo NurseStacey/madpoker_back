@@ -129,7 +129,7 @@ class GameModel(models.Model):
     def GetText(self):
         try:
 
-            return '{} - {} - {} '.format(self.venue.venue_name, self.week_day,self.time)
+            return '{} - {} - {} - {} '.format(self.venue.venue_name, self.week_day,self.time, self.game_type.name)
         except:
             return 'default'
     
@@ -144,6 +144,12 @@ class GameModel(models.Model):
         )
         return oneGame.pk    
 
+class CanceledGamesModel(models.Model):
+    which_game= models.ForeignKey(GameModel, 
+                                on_delete=models.CASCADE, 
+                                null=True, 
+                                related_name='canceled_games')
+    date=models.DateField(default=timezone.now)
 
 class PlayedGameModel(models.Model):
     which_game= models.ForeignKey(GameModel, 
@@ -260,62 +266,3 @@ class PlayedGameModel(models.Model):
 
         return return_value
     
-# class SectionThrough(models.Model):
-#     section=models.ForeignKey(SectionModel, on_delete=models.PROTECT, default=SectionModel.get_default_pk)
-#     game=models.ForeignKey(GameModel, on_delete=models.PROTECT)
-#     director=models.ForeignKey(UserModel, null=True, on_delete=models.SET_NULL)
-#     active=models.BooleanField(default=True)  
-#     description=models.CharField(max_length=250, null=True, blank=True)
-
-#     def need_to_protect(self):
-
-#         try:
-#             if len(PlayedGameModel.objects.filter(which_game=self))==0:
-#                 return False
-#             for onePlayedGame in PlayedGameModel.objects.filter(which_game=self):
-#                 if onePlayedGame.date<date.today() and len(onePlayedGame.player_results.all()):
-#                     return True
-            
-#             return False
-#         except Exception as e:
-#             print(e)
-
-    
-#     def GetNextPlayedGameInfo(self):
-#         Today=date.today()
-
-#         next_game=None
-#         try:
-#             next_game=self.played_games.all().latest('date')
-#         except:
-#             pass
-
-#         # if next_game.finalized:
-#         #     next_game = PlayedGameModel(
-#         #         which_game=self,
-#         #         date = (next_game.date+timedelta(days=offset))
-#         #     )
-#         #     next_game.save()
-
-#         if next_game==None or next_game.finalized or (next_game.date-Today).days<0:
-  
-#             today_weekday = (Today.weekday()+1 % 7) #0 is Monday here.  0 is Sunday in model
-
-#             offset=WeekDayNumbers[self.game.week_day]-today_weekday
-#             if offset<0:
-#                 offset+=7
-
-#             next_game = PlayedGameModel(
-#                 which_game=self,
-#                 date = (date(Today.year, Today.month, Today.day)+timedelta(days=offset))
-#             )
-#             next_game.save()
-        
-#         return {
-#             'description':self.description,
-#             'id':self.id,
-#             'event':self.section.name,            
-#             'played_game_id':next_game.id,
-#             'date':next_game.date.strftime('%m-%d')
-#         }        
-

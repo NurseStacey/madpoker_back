@@ -2,6 +2,7 @@ from django.shortcuts import render
 from rest_framework import status
 from players.models import PlayerModel
 from games.models import GameModel,PlayedGameModel
+from venues.models import VenueModel
 from seasons.models import SeasonModel
 from .serializers import *
 from rest_framework.views import APIView
@@ -123,27 +124,6 @@ class UpdateRosterAPI(APIView):
                 'result':'problem',
                 'problem_players':problemPlayers
                 }, status=status.HTTP_400_BAD_REQUEST)
-        
-  
-# def RegisterForGame(PlayerID, GameID):
-#     try:
-
-#         thisRecord = PlayedGameModel.objects.get(id=GameID)
-#         thisPlayer = PlayerModel.objects.get(id=PlayerID)
-#         try:
-#             thisRecord.player_results.get(player=thisPlayer)
-#             return Response({'status':'player already registered'}, status=status.HTTP_201_CREATED)
-#         except Exception as e:
-
-#             new_player_result = GameResultModel(player=thisPlayer)
-#             new_player_result.save()
-#             thisRecord.player_results.add(new_player_result)
-
-#             return Response({'status':'player added'}, status=status.HTTP_201_CREATED)
-#     except Exception as e:
-#         print(e)
-        
-#         return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST) 
     
     
 class GamesRegistrationsAPI(APIView):
@@ -216,9 +196,9 @@ class PullDataForPoints(APIView):
                     finalized=True)
             
             if not thisSeasonRec==None:
-                these_played_games=these_played_games.objects.filter(season=thisSeasonRec)
+                these_played_games=these_played_games.filter(season=thisSeasonRec)
             if not these_games==None:
-                these_played_games=these_played_games.objects.filter(which_game__in=these_games)
+                these_played_games=these_played_games.filter(which_game__in=these_games)
 
             these_game_reults = GameResultModel.objects.filter(game__in=these_played_games)
             all_player_summary = these_game_reults.annotate(
@@ -234,16 +214,19 @@ class PullDataForPoints(APIView):
             season_stats = []
             for one_season in set([x['season_name'] for x in all_player_summary]):
                 this_position_list = list(reversed(sorted([x['total_points'] for x in [y for y in all_player_summary if y['season_name']==one_season]])))
-                this_player_position = all_player_summary.filter(season_name=one_season).get(player=thisPlayerRec)
-                this_position = this_position_list.index(this_player_position['total_points'])+1
-                season_stats.append({
-                    'season_name':one_season,
-                    'position':this_position,
-                    'average_position':this_player_position['average_position'],
-                    'average_points':this_player_position['average_points'],
-                    'total_points':this_player_position['total_points'],
-                })
-
+                try:
+                    this_player_position = all_player_summary.filter(season_name=one_season).get(player=thisPlayerRec)
+                    this_position = this_position_list.index(this_player_position['total_points'])+1
+                    season_stats.append({
+                        'season_name':one_season,
+                        'position':this_position,
+                        'average_position':this_player_position['average_position'],
+                        'average_points':this_player_position['average_points'],
+                        'total_points':this_player_position['total_points'],
+                    })
+                except:
+                    pass
+                
             game_results = these_game_reults.filter(player=thisPlayerRec
                 ).annotate(date=F('game__date')
                     ).annotate(venue=F('game__which_game__venue__venue_name')

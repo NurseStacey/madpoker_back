@@ -7,8 +7,8 @@ class GamesSerializer(serializers.ModelSerializer):
     game_text = serializers.SerializerMethodField()
 
     class Meta:
-        model = GameResultModel
-        fields ='__all__'    
+        model = GameModel
+        fields ='__all__'
 
     def get_game_text(self,obj):
         return obj.GetText()
@@ -43,6 +43,12 @@ class PlayedGamesSerializer(serializers.ModelSerializer):
     
     def get_OtherEvents(self,obj):
         return obj.get_other_events()
+    
+class CanceledGamesSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = CanceledGamesModel
+        fields ='__all__'
     
 # class SectionSerializer(serializers.ModelSerializer):
 

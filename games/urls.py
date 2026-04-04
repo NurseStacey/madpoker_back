@@ -12,16 +12,8 @@ urlpatterns = [
     path('played_games_events/<int:id>/', PlayedGamesEvents.as_view(), name='events-for-player'),
     path('gameinfo_for_review/', GameInfoForReview.as_view(), name='gameinfo-for-review'),
     path('played_game_list/<str:seasonidstr>/<str:venueidstr>/',PlayedGamesList.as_view(), name='played_game_list'), 
-    path('test/',CreateTestingData)
-    # path('games_by_director/<int:id>/',GamesByDirectorAPI.as_view(), name='games_by_director'),
-    # 
-    # 
-    #path('sections/',SectionsAPI.as_view(), name='sections'), 
-    # path('get_all_sections/', AllSectionsAPI.as_view(), name='sections'),
-    # path('one_section/<int:id>/',SectionsAPI.as_view(), name='one_event'),
-    # path('sectionthrough/',SectionsThroughAPI.as_view(), name='section_through'),
-    # path('one_sectionthrough/<int:id>/',SectionsThroughAPI.as_view(), name='one_section_through'),
-    # path('info_for_locations_page/',InfoForLocations, name='info_for_locations_page'),
-    # path('get_all_info_for_game_view/',GetAllGamesInfoGameView.as_view(), name='get_all_info_for_game_view'),
-    # path('get_this_player_results/<int:id>/',GetThisPlayerResults.as_view(), name='get_this_player_results'),    
+    path('canceled_game_list/',GetCanceledGames.as_view(), name='canceled_game_list'), 
+    path('uncancel_game/<int:id>/',UnCancelGame.as_view(), name='uncancel_game'),     
+    path('test/',CreateTestingData),
+    path('print_test_file/', PrintTestFile)
 ]
