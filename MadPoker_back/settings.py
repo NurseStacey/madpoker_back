@@ -39,6 +39,7 @@ INSTALLED_APPS = [
     'seasons',
     'gameresults',
     'learning',
+    'tournaments'
    # 'consolidated_data'
 ]
 

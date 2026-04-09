@@ -25,7 +25,6 @@ class GameRostersAPI(APIView):
 #used to get roster for  director
     def get(self, request, id, *args, **kwargs):
 
-
         try:
             thisGame = PlayedGameModel.objects.get(id=id)
             serializer = GameResultsSerializer(GameResultModel.objects.filter(game=thisGame), many=True)

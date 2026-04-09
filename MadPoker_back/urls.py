@@ -13,5 +13,6 @@ urlpatterns = [
     path('players/', include('players.urls')),
     path('seasons/', include('seasons.urls')),
     path('gameresults/', include('gameresults.urls')),    
+    path('tournaments/', include('tournaments.urls')),    
    # path('consolidated_data/',include('consolidated_data.urls'))
 ]

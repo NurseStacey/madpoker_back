@@ -4,7 +4,7 @@ from .serializers import *
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.views import APIView
-
+from games.models import PlayedGameModel
 
 
 # class SeasonsWithVenuesGamesAPI(APIView):
@@ -67,8 +67,13 @@ class SeasonModelAPI(APIView):
             serializer = SeasonSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
+
+                for one_played_game in PlayedGameModel.objects.filter(season=None):
+                    one_played_game.save()
+                    ## in order to make sure everything has a season
+
                 return Response(serializer.data, status=status.HTTP_201_CREATED)
-        except:
+        except  Exception as e:
             
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         #
@@ -81,7 +86,8 @@ class SeasonModelAPI(APIView):
             thisRecord = SeasonModel.objects.get(id=id)
             serializer = SeasonSerializer(thisRecord, data=request.data, partial=True)
             if serializer.is_valid():
-
+                for one_played_game in PlayedGameModel.objects.filter(season=id):
+                    one_played_game.save()
                 serializer.save()
                 
         except Exception as e:

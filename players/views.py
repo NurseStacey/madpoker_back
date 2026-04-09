@@ -3,7 +3,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from .models import *
 from .serializers import *
-from rest_framework.permissions import AllowAny
 from rest_framework import status
 from django.db.utils import IntegrityError
 
@@ -20,12 +19,18 @@ class PlayersAPI(APIView):
 
             serializer = PlayersSerializer(data=request.data)
 
-            serializer.is_valid()
-            serializer.save()
+            if serializer.is_valid():
+                serializer.save()
+            else:
+                if 'player' in serializer.errors:
+                    for one_error in serializer.errors['player']:
+                        if one_error.code=='unique':
+                            return Response(serializer.errors, status=status.HTTP_409_CONFLICT)
+                        
             return Response(serializer.data, status=status.HTTP_201_CREATED)
 
         except IntegrityError:
-            print('here')
+            #print('here')
             return Response(serializer.errors, status=status.HTTP_409_CONFLICT)
         except Exception as e:
             print(serializer.errors)
@@ -36,4 +41,3 @@ class PlayersAPI(APIView):
 
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-        return Response({'error':'invalid data'}, status=status.HTTP_400_BAD_REQUEST)

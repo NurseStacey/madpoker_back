@@ -11,8 +11,9 @@ from players.models import PlayerModel
 from django.db.models import ProtectedError
 from django.http import JsonResponse
 from django.db.models import F
+from datetime import date, timedelta
+import calendar
 
-      
 class GameModelAPI(APIView):
     #used for getting all games and creating/altering a game
     def get(self, request, *args, **kwargs):
@@ -96,10 +97,25 @@ def InfoForLocations(request, *args, **kwargs):
         "Saturday":[],
     }
 
+    CanceledDates={
+        "Sunday":[],
+        "Monday":[],
+        "Tuesday":[],
+        "Wednesday":[],
+        "Thursday":[],
+        "Friday":[],
+        "Saturday":[],
+    }    
+    this_day = date.today()
+    for one_day in range(7):
+        CanceledDates[calendar.day_name[this_day.weekday()]]=this_day
+        this_day += timedelta(1)
+
+
     try:
         for one_game in GameModel.objects.filter(active=True).order_by('venue__venue_name','time'):
 
-            this_dictionary=one_game.GetNextPlayedGameInfo()
+            this_dictionary=one_game.GetNextPlayedGameInfo(CanceledDates)
             return_values[one_game.week_day].append(this_dictionary)
 
     except Exception as e:
@@ -258,7 +274,7 @@ class PlayedGamesList(APIView):
                 these_games= GameModel.objects.filter(venue=thisVenueRec)
             except:
                 pass
-        these_played_games = PlayedGameModel.objects.filter(finalized=True)
+        these_played_games = PlayedGameModel.objects.filter(finalized=True).exclude(season=None)
         if not thisSeasonRec==None:
             these_played_games=these_played_games.objects.filter(season=thisSeasonRec)
         if not these_games==None:

@@ -44,7 +44,7 @@ class GameModel(models.Model):
 
         return return_value
 
-    def GetNextPlayedGameInfo(self):
+    def GetNextPlayedGameInfo(self,CanceledDates):
         Today=date.today()
 
         next_game=None
@@ -70,8 +70,13 @@ class GameModel(models.Model):
         except Exception as e:
             print(e)
         
+        canceled=True
+        try:
+            CanceledGamesModel.objects.filter(which_game=self).get(date=CanceledDates[next_game.get_week_day()])
+        except:
+            canceled=False
         return {
-            #'description':self.description,
+            'canceled':canceled,
             'description':self.create_description_array(),
             'id':self.id, 
             'played_game_id':next_game.id,
