@@ -8,6 +8,17 @@ from django.http import JsonResponse
 from venues.models import VenueModel
 from games.models import GameTypeModel 
 
+class TournamentInfoForPlayerPage(APIView):
+    def get(self, request, *arges, **kwargs):
+        try:
+            Tournaments = TournamentModel.objects.all().order_by('-date')
+            serializer = TournamentSerializerForPlayerPage(Tournaments, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            print(e)
+            return Response({'status':'Problem'}, status=status.HTTP_400_BAD_REQUEST)
+
 class OneTournamentAPI(APIView):
     def get(self, request, id, *args, **kwargs):
 

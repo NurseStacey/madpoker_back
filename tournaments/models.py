@@ -3,6 +3,7 @@ from players.models import PlayerModel
 from venues.models import VenueModel
 from django.utils import timezone
 from games.models import GameTypeModel
+from datetime import time
 
 class WinnersModel(models.Model):
     player=models.ForeignKey(PlayerModel, null=True, on_delete=models.PROTECT)
@@ -17,6 +18,7 @@ class TournamentModel(models.Model):
     total_prize_pool = models.FloatField(default=0)
     winners = models.ManyToManyField(WinnersModel)
     location = models.ForeignKey(VenueModel, null=True, on_delete=models.PROTECT)
+    time = models.TimeField(default=time(10,0))
     date = models.DateField(default=timezone.now())
     override_message = models.TextField(default='', null=True, blank=True)
     game_type = models.ForeignKey(GameTypeModel,  on_delete=models.SET_DEFAULT, default=GameTypeModel.get_default_pk)
