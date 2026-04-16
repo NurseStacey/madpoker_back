@@ -5,6 +5,7 @@ from django.utils import timezone
 from games.models import GameTypeModel
 from datetime import time
 
+
 class WinnersModel(models.Model):
     player=models.ForeignKey(PlayerModel, null=True, on_delete=models.PROTECT)
     place = models.IntegerField(default=0)
@@ -26,3 +27,14 @@ class TournamentModel(models.Model):
 
     def __repr__(self):
         return self.name
+
+class TournamentPlayersModel(models.Model):
+    player=models.ForeignKey(PlayerModel, null=True, on_delete=models.PROTECT)
+    position=models.IntegerField(default=0)
+    registration_date_time=models.DateTimeField(default=timezone.now)
+    tournament=models.ForeignKey(TournamentModel, null=True, on_delete=models.PROTECT)
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(fields=['tournament', 'player'], name='tournament_unique_registration')
+        ]    

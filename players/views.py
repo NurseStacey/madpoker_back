@@ -10,10 +10,13 @@ class PlayersAPI(APIView):
 
     def get(self, request, *args, **kwargs):
 
-        Games = PlayerModel.objects.exclude(player='this is not a player')
-        serializer = PlayersSerializer(Games, many=True)
-        return Response(serializer.data)
-    
+        try:
+            Games = PlayerModel.objects.exclude(player='this is not a player')
+            serializer = PlayersSerializer(Games, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)    
+        
     def post(self, request,*args, **kwargs):
         try:
 

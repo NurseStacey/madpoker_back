@@ -8,6 +8,26 @@ from django.http import JsonResponse
 from venues.models import VenueModel
 from games.models import GameTypeModel 
 
+class RegisterForTournament(APIView):
+    def post(self, request, *args, **kwargs):
+
+        try:
+            if TournamentModel.objects.get(id=request.data['which_tournament']).finalized:
+                return Response({'status':'locked'}, status=status.HTTP_423_LOCKED) 
+            
+            TournamentPlayersModel.objects.create(
+                player=PlayerModel.objects.get(id=request.data['which_player']),
+                tournament=TournamentModel.objects.get(id=request.data['which_tournament'])
+            )
+           
+        except Exception as e:
+            if 'UNIQUE' in e.args[0]:
+                return Response({'status':'duplicate'}, status=status.HTTP_409_CONFLICT)    
+            print(e)
+            return Response({'status':'problem'}, status=status.HTTP_400_BAD_REQUEST)
+
+        return Response({'status':'player added'}, status=status.HTTP_201_CREATED)
+            
 class TournamentInfoForPlayerPage(APIView):
     def get(self, request, *arges, **kwargs):
         try:
@@ -61,6 +81,82 @@ class OneTournamentAPI(APIView):
 
         return Response({}, status=status.HTTP_200_OK)
 
+class TournamentRosterRemovePlayer(APIView):
+    def delete(self, request, id, *args, **kwargs):
+
+        try:
+            TournamentPlayersModel.objects.get(id=id).delete()
+        except Exception as e:
+            print(e)
+            return Response({'status':'Problem'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        return Response({}, status=status.HTTP_200_OK)
+
+class TournamentRosterFinalize(APIView):
+    def post(self, request, id, *args, **kwargs):
+
+        try:
+            thisTournament=TournamentModel.objects.get(id=id)
+            thisTournament.finalized=True
+            thisTournament.save()
+            return Response({}, status=status.HTTP_200_OK)                      
+        except Exception as e:
+            print(e)
+            return Response({
+                'result':'problem',
+                }, status=status.HTTP_400_BAD_REQUEST)            
+        
+class TournamentRosterUpdate(APIView):
+    def post(self, request, *args, **kwargs):
+            
+        problemPlayers=[]
+
+        which_tournament=-1
+        for onePlayer in request.data['allUsers']:           
+            try:
+
+                thisRecord= TournamentPlayersModel.objects.get(id=onePlayer['id'])
+                if str(onePlayer['position']).isdigit():
+                    which_tournament=thisRecord.tournament.id
+                    thisPosition=int(onePlayer['position'])
+
+                    if thisPosition>0 and not thisPosition==thisRecord.position:
+                        thisRecord.position=thisPosition
+
+                        thisRecord.save()
+                
+            except:
+                problemPlayers.append(onePlayer['name'])
+
+        if problemPlayers==[] and not which_tournament==-1:
+            try:
+                thisTournament= TournamentModel.objects.get(id=which_tournament)
+                serializer = TournamentRosterSerializer(TournamentPlayersModel.objects.filter(tournament=thisTournament), many=True)            
+                return Response(serializer.data, status=status.HTTP_200_OK)  
+            except Exception as e:
+                print(e)
+                return Response({
+                    'result':'problem',
+                    'problem_players':[]
+                    }, status=status.HTTP_400_BAD_REQUEST)                
+        else: 
+            return Response({
+                'result':'problem',
+                'problem_players':problemPlayers
+                }, status=status.HTTP_400_BAD_REQUEST)
+    
+class TournamentRoster(APIView):
+    def get(self, request, id, *args, **kwargs):
+
+        try:
+            theseRecords = TournamentPlayersModel.objects.filter(
+                tournament=TournamentModel.objects.get(id=id)).order_by('player__player')
+            serializer=TournamentRosterSerializer(theseRecords, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+
+        except Exception as e:
+            print(e)
+            return Response({'status':'Problem'}, status=status.HTTP_400_BAD_REQUEST)
 
 class TournamentAPI(APIView):
 

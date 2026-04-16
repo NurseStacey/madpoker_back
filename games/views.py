@@ -31,6 +31,8 @@ class GameModelAPI(APIView):
             serializer = GamesSerializer(data=request.data)
             if serializer.is_valid():
                 serializer.save()
+            else:
+                return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
         except Exception as e:
             print(e)

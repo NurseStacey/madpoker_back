@@ -15,10 +15,10 @@ class VenuesAPI(APIView):
 
         try:
             TextItems = VenueModel.objects.all().order_by('venue_name')
-            serializer = VenuesSerializer(TextItems, many=True)
+            serializer = VenuesSerializer(TextItems, many=True)         
             return Response(serializer.data, status=status.HTTP_200_OK)
         except Exception as e:
-            print(e)
+
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def post(self, request,*args, **kwargs):

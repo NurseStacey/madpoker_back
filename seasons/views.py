@@ -47,10 +47,13 @@ class SeasonModelAPI(APIView):
     #For seasons
     def get(self, request, *args, **kwargs):
 
-        Seasons = SeasonModel.objects.all()
-        serializer = SeasonSerializer(Seasons, many=True)
+        try:
+            Seasons = SeasonModel.objects.all()
+            serializer = SeasonSerializer(Seasons, many=True)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        except:
+            return Response({}, status=status.HTTP_400_BAD_REQUEST)    
 
-        return Response(serializer.data)
     
     def post(self, request,*args, **kwargs):
         
