@@ -20,7 +20,7 @@ class TournamentModel(models.Model):
     winners = models.ManyToManyField(WinnersModel)
     location = models.ForeignKey(VenueModel, null=True, on_delete=models.PROTECT)
     time = models.TimeField(default=time(10,0))
-    date = models.DateField(default=timezone.now())
+    date = models.DateField(default=timezone.now)
     override_message = models.TextField(default='', null=True, blank=True)
     game_type = models.ForeignKey(GameTypeModel,  on_delete=models.SET_DEFAULT, default=GameTypeModel.get_default_pk)
     finalized = models.BooleanField(default=False)
