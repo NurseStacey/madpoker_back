@@ -4,7 +4,7 @@ from rest_framework.response import Response
 from .models import *
 from .serializers import *
 from rest_framework.permissions import AllowAny
-from rest_framework import status
+from rest_framework import status,viewsets
 from django.db.models import ProtectedError
 from games.models import PlayedGameModel, GameModel
 from datetime import date
@@ -12,7 +12,7 @@ from rest_framework.parsers import MultiPartParser, FormParser
 
 class VenuesAPI(APIView):
     parser_classes = (MultiPartParser, FormParser)
-    serializer_class = VenuesSerializer
+
     def get(self, request, *args, **kwargs):
 
         try:
@@ -24,8 +24,9 @@ class VenuesAPI(APIView):
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     
     def post(self, request,*args, **kwargs):
+        pass
         try:
-            serializer=self.get_serializer(data=request.data)
+            serializer=VenuesSerializer(data=request.data)
 
             if serializer.is_valid():
                 serializer.save()

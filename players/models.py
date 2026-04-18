@@ -7,7 +7,7 @@ class PlayerModel(models.Model):
     first_name=models.CharField(null=True, default='', blank=True)
     last_name=models.CharField(null=True,  default='', blank=True)
     password=models.CharField(null=True,  default='', blank=True)
-    
+
     @classmethod
     def get_default_pk(cls):
         oneGame, created = cls.objects.get_or_create(
