@@ -7,3 +7,7 @@ class PlayersSerializer(serializers.ModelSerializer):
         model = PlayerModel
         fields ='__all__'    
 
+class WinnerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = WinnersModel
+        fields='__all__'

@@ -13,6 +13,19 @@ class GamesSerializer(serializers.ModelSerializer):
     def get_game_text(self,obj):
         return obj.GetText()
 
+    def validate_season_type(self, value):
+            if value!=None:
+                return value
+            else:
+                return SeasonTypeModel.get_default()
+
+    def validate_game_type(self, value):
+            if value!=None:
+                return value
+            else:
+                return GameTypeModel.get_default()    
+    
+    
 class GamesTypesSerializer(serializers.ModelSerializer):
 
     class Meta:

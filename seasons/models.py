@@ -7,7 +7,16 @@ class SeasonTypeModel(models.Model):
     season_type = models.CharField(max_length=100, default='In Person')
   
     @classmethod
+    def get_default(cls):
+        pass
+        season,created = cls.objects.get_or_create(
+            season_type='In Person', 
+        )
+        return season
+    
+    @classmethod
     def get_default_pk(cls):
+        pass
         season,created = cls.objects.get_or_create(
             season_type='In Person', 
         )

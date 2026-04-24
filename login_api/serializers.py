@@ -5,7 +5,7 @@ from django.contrib.auth import authenticate
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model =UserModel 
-        fields = ('id', 'username', 'email', 'is_superuser','image', 'phone')
+        fields = ('id', 'username', 'email', 'is_superuser','image', 'phone','display_name')
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
     password1 = serializers.CharField(write_only=True)
@@ -14,7 +14,7 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
     class Meta:
         image = serializers.ImageField(required=False)
         model =UserModel 
-        fields = ('id', 'username', 'email', 'password1', 'password2', 'image','phone')    
+        fields = ('id', 'username', 'email', 'password1', 'password2', 'image','phone','display_name')    
         extra_kwargs={'password':{'write_only':True}}
 
     def validate(self, attrs):

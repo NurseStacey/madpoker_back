@@ -12,6 +12,13 @@ class GameTypeModel(models.Model):
     name=models.CharField(max_length=20, default='Texas Holdem', unique=True)
 
     @classmethod
+    def get_default(cls):
+        game_type,created = cls.objects.get_or_create(
+            name='Texas Holdem', 
+        )
+        return game_type
+    
+    @classmethod
     def get_default_pk(cls):
         game_type,created = cls.objects.get_or_create(
             name='Texas Holdem', 
@@ -27,9 +34,9 @@ class GameModel(models.Model):
     venue=models.ForeignKey(VenueModel, null=True, on_delete=models.PROTECT)
     active=models.BooleanField(default=True)  
     director=models.ForeignKey(UserModel, on_delete=models.SET_NULL, null=True)
-    description=models.CharField(max_length=250, null=True, blank=True)
-    season_type=models.ForeignKey(SeasonTypeModel,  on_delete=models.SET_DEFAULT,default=SeasonTypeModel.get_default_pk )
-    game_type = models.ForeignKey(GameTypeModel,  on_delete=models.SET_DEFAULT, default=GameTypeModel.get_default_pk)
+    description=models.CharField(max_length=1000, null=True, blank=True)
+    season_type=models.ForeignKey(SeasonTypeModel,  null=True, on_delete=models.SET_DEFAULT,default=SeasonTypeModel.get_default_pk )
+    game_type = models.ForeignKey(GameTypeModel,  null=True,  on_delete=models.SET_DEFAULT, default=GameTypeModel.get_default_pk)
     
     def __repr__(self):
         return self.venue.venue_name + "-" + self.week_day

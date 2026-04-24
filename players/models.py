@@ -20,3 +20,12 @@ class PlayerModel(models.Model):
     
     def __repr__(self):
         return self.player
+    
+class WinnersModel(models.Model):
+    player=models.ForeignKey(PlayerModel,
+                             null=True, 
+                             related_name='winning_player',
+                             on_delete=models.PROTECT)
+    image = models.ImageField(default='winners_pics/default.jpg',
+                                     upload_to='winners_pics')    
+    display_text = models.CharField(max_length=100, null=True)
