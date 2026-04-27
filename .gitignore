@@ -2,3 +2,4 @@ env/
 db.sqlite3
 media/venue_pics/*.*
 media/profile_pics/*.*
+media/winners_pics/*.*
